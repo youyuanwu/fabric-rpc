@@ -37,6 +37,22 @@ endif()
 include(${service_fabric_cpp_SOURCE_DIR}/cmake/clang-format.cmake)
 
 add_subdirectory(src)
+
+# nuget package
+add_custom_target(nuget_pack
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  COMMAND nuget pack FabricRpc.nuspec 
+    -OutputDirectory ${CMAKE_CURRENT_BINARY_DIR}/packages
+)
+
+add_custom_target(nuget_inspect
+  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  COMMAND ${CMAKE_COMMAND} -E rm -rf build/nuget_inspect
+  COMMAND nuget install FabricRpc 
+    -Source ${CMAKE_CURRENT_BINARY_DIR}/packages
+    -OutputDirectory build/nuget_inspect
+)
+
 add_subdirectory(examples)
 
 enable_testing()

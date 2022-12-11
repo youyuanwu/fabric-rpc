@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>FabricRpc</id>
+    <version>0.0.1</version>
+    <authors>Youyuan Wu</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <!-- <icon>icon.png</icon> -->
+    <projectUrl>https://github.com/youyuanwu/fabric-rpc</projectUrl>
+    <description>RPC framework based on FabricTransport in Service Fabric.</description>
+    <releaseNotes>First Release</releaseNotes>
+    <copyright>Copyright (c) 2022 Youyuan Wu</copyright>
+    <tags>ServiceFabric RPC native</tags>
+    <readme>README.md</readme>
+  </metadata>
+  <files>
+    <!-- Add a readme -->
+    <file src="README.md" target="" />
+
+    <!-- Add files from an arbitrary folder that's not necessarily in the project -->
+    <file src="build\src\generator\Release\fabric_rpc_cpp_plugin.*" target="tools\Release" />
+    <file src="build\src\generator\Debug\fabric_rpc_cpp_plugin.*" target="tools\Debug" />
+
+    <file src="build\src\Release\fabric_rpc.*" target="content\lib\Release" />
+    <file src="build\src\Debug\fabric_rpc.*" target="content\lib\Debug" />
+
+    <file src="include\**" target="content\include" />
+  </files>
+</package>

@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package helloworld;
+
+service FabricHello {
+  rpc SayHello (FabricRequest) returns (FabricResponse) {}
+}
+
+message FabricRequest {
+  string fabricName = 1;
+}
+
+message FabricResponse {
+  string fabricMessage = 1;
+}

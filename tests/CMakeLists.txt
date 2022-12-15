@@ -26,3 +26,12 @@ target_link_libraries(${_test_name}
 # boost log leaks memory as intended, so do not check mem leaks.
 add_test(NAME ${_test_name} COMMAND ${_test_name}
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+
+add_executable(fabric_rpc_base_test fabric_rpc_base_test.cpp)
+target_link_libraries(fabric_rpc_base_test
+  PUBLIC Boost::unit_test_framework Boost::disable_autolinking
+  PUBLIC fabric_headers
+  PUBLIC fabric_rpc
+)
+add_test(NAME fabric_rpc_base_test COMMAND fabric_rpc_base_test
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR})

@@ -62,8 +62,9 @@ public:
     *context = ctx.detach();
     return fabricrpc::Status();
   }
-  fabricrpc::Status EndSayHello(IFabricAsyncOperationContext *context,
-                     /*out*/ ::helloworld::FabricResponse *response) override {
+  fabricrpc::Status
+  EndSayHello(IFabricAsyncOperationContext *context,
+              /*out*/ ::helloworld::FabricResponse *response) override {
     async_any_context *ctx = dynamic_cast<async_any_context *>(context);
     std::any &a = ctx->get_any();
     std::string message = std::any_cast<std::string>(a);

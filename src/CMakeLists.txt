@@ -19,6 +19,7 @@ add_library(fabric_rpc STATIC
   Status.cpp
   FRPCRequestHandler.cpp
   FRPCTransportMessage.cpp
+  FRPCHeader.cpp
 )
 
 target_include_directories(fabric_rpc PUBLIC ../include)

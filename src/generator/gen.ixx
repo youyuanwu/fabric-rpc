@@ -130,6 +130,7 @@ public:
       "#include <atlbase.h>\n"
       "#include <atlcom.h>\n"
       "#include \"fabricrpc/Operation.h\"\n"
+      "#include \"fabricrpc/FRPCHeader.h\"\n" // TODO: see if possible to get rid of this.
     );
 
     std::string services_code = GetHeaderServices(file_);
@@ -162,7 +163,7 @@ public:
     }
 
     // create the request handler
-    p.AddLn("void CreateFabricRPCRequestHandler(std::shared_ptr<fabricrpc::MiddleWare> svc, IFabricTransportMessageHandler ** handler);");
+    p.AddLn("void CreateFabricRPCRequestHandler(const std::vector<std::shared_ptr<fabricrpc::MiddleWare>> & svcList, IFabricTransportMessageHandler ** handler);");
 
     p.AddLn(vars,"} // namespace $Namespace$");
     return p.GetOutput();
@@ -283,12 +284,15 @@ public:
     }
 
     // create the request handler
-    p.AddLn("void CreateFabricRPCRequestHandler(std::shared_ptr<fabricrpc::MiddleWare> svc,\n"
+    p.AddLn("void CreateFabricRPCRequestHandler(const std::vector<std::shared_ptr<fabricrpc::MiddleWare>> & svcList,\n"
             "                                    IFabricTransportMessageHandler **handler) {");
     p.Indent();
-    p.AddLn("CComPtr<CComObjectNoLock<fabricrpc::FRPCRequestHandler>> msgHandlerPtr(\n"
+    p.AddLn(
+            "using privateconverter = fabricrpc::FabricRPCHeaderProtoConverter<fabricrpc::request_header, fabricrpc::reply_header>;\n"
+            "std::shared_ptr<fabricrpc::IFabricRPCHeaderProtoConverter> cv = std::make_shared<privateconverter>();\n"
+            "CComPtr<CComObjectNoLock<fabricrpc::FRPCRequestHandler>> msgHandlerPtr(\n"
             "  new CComObjectNoLock<fabricrpc::FRPCRequestHandler>());\n"
-            "msgHandlerPtr->Initialize(svc);\n"
+            "msgHandlerPtr->Initialize(svcList, cv);\n"
             "*handler = msgHandlerPtr.Detach();\n"
     );
     p.Outdent();
@@ -312,12 +316,14 @@ public:
 
     // include generated header
     p.AddLn(vars, "#include \"$filename_base$.fabricrpc.h\"");
-    
+    p.AddLn(vars, "#include <fabricrpc.pb.h>");
+
     // fabric rpc required headers
     p.Add(
       "#include <functional>\n"
       "#include \"fabricrpc/ClientHelpers.h\"\n"
       "#include \"fabricrpc/FRPCRequestHandler.h\"\n"
+      "#include \"fabricrpc/FRPCHeader.h\"\n"
     );
     
     std::string services_cc_code = GetCCServices(file_);
@@ -356,7 +362,9 @@ public:
     }
     p.Outdent();
     p.Add("private:\n");
-    p.Add("  CComPtr<IFabricTransportClient> client_;");
+    p.Add("  CComPtr<IFabricTransportClient> client_;\n"
+          "  std::shared_ptr<fabricrpc::IFabricRPCHeaderProtoConverter> cv_;\n"
+    );
     p.Add("};\n");
   }
 
@@ -393,8 +401,9 @@ public:
     // generate routing code.
     vars["Service"] = service->name();
     p.Add(vars,
+      "using privateconverter = fabricrpc::FabricRPCHeaderProtoConverter<fabricrpc::request_header, fabricrpc::reply_header>;\n"
       "$Service$Client::$Service$Client(IFabricTransportClient *client)\n"
-      "  : client_() {\n"
+      "  : client_(), cv_(std::make_shared<privateconverter>()) {\n"
       "  client->AddRef();\n"
       "  client_.Attach(client);\n"
       "}\n"
@@ -410,14 +419,14 @@ public:
             "fabricrpc::Status $Service$Client::Begin$Method$("
             "const $Request$* request, "
             "IFabricAsyncOperationCallback *callback, /*out*/ IFabricAsyncOperationContext **context){\n"
-            "  return fabricrpc::ExecClientBegin(client_, \"/$Package$$Service$/$Method$\", request,\n"
+            "  return fabricrpc::ExecClientBegin(client_, cv_, \"/$Package$$Service$/$Method$\", request,\n"
             "             callback, context);"
             "}\n"
         );
         p.AddLn(vars,
             "fabricrpc::Status $Service$Client::End$Method$("
             "IFabricAsyncOperationContext *context, /*out*/$Response$* response){\n"
-            "  return fabricrpc::ExecClientEnd(client_, context, response);"
+            "  return fabricrpc::ExecClientEnd(client_, cv_, context, response);"
             "}\n"
         );
       }else{

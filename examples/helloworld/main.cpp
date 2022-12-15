@@ -45,10 +45,11 @@ int main() {
   addr.Path = L"/";
   addr.Port = 12345;
 
-  std::shared_ptr<Service_Impl> hello_svc = std::make_shared<Service_Impl>();
+  std::shared_ptr<fabricrpc::MiddleWare> hello_svc =
+      std::make_shared<Service_Impl>();
 
   belt::com::com_ptr<IFabricTransportMessageHandler> req_handler;
-  helloworld::CreateFabricRPCRequestHandler(hello_svc, req_handler.put());
+  helloworld::CreateFabricRPCRequestHandler({hello_svc}, req_handler.put());
 
   belt::com::com_ptr<IFabricTransportConnectionHandler> conn_handler =
       sf::transport_dummy_server_conn_handler::create_instance().to_ptr();

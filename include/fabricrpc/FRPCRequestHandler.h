@@ -11,8 +11,10 @@
 #include "fabrictransport_.h"
 
 #include "fabricrpc/Operation.h"
+#include "fabricrpc/FRPCHeader.h"
 
 #include <memory>
+#include <vector>
 
 namespace fabricrpc{
 
@@ -25,7 +27,7 @@ END_COM_MAP()
 
 public:
   FRPCRequestHandler();
-  void Initialize(std::shared_ptr<MiddleWare> svc);
+  void Initialize(const std::vector<std::shared_ptr<MiddleWare>> & svcList, std::shared_ptr<IFabricRPCHeaderProtoConverter> cv);
 
   HRESULT STDMETHODCALLTYPE BeginProcessRequest(
       /* [in] */ COMMUNICATION_CLIENT_ID clientId,
@@ -43,6 +45,7 @@ public:
       /* [in] */ IFabricTransportMessage *message) override;
 private:
     std::shared_ptr<MiddleWare> svc_;
+    std::shared_ptr<IFabricRPCHeaderProtoConverter> cv_;
 };
 
 } // namespace fabricrpc

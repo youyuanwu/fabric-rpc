@@ -6,6 +6,7 @@
 #include <atlbase.h>
 #include <atlcom.h>
 #include "fabricrpc/Operation.h"
+#include "fabricrpc/FRPCHeader.h"
 // Service pkg helloworld.
 namespace helloworld {
 class FabricHello final {
@@ -33,5 +34,6 @@ public:
   fabricrpc::Status EndSayHello(IFabricAsyncOperationContext *context, /*out*/FabricResponse* response);
 private:
   CComPtr<IFabricTransportClient> client_;
+  std::shared_ptr<fabricrpc::IFabricRPCHeaderProtoConverter> cv_;
 };
 } // namespace helloworld

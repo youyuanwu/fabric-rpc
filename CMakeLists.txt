@@ -26,7 +26,7 @@ message(STATUS "fetching service-fabric-cpp")
 include(FetchContent)
 FetchContent_Declare(service_fabric_cpp
     GIT_REPOSITORY https://github.com/youyuanwu/service-fabric-cpp.git
-    GIT_TAG d0bed363785fdab87655c3bdbe6deba13b94f874
+    GIT_TAG ca34352223600d701b2ec40db4d31167469e1035
 )
 FetchContent_GetProperties(service_fabric_cpp)
 if(NOT service_fabric_cpp_POPULATED)

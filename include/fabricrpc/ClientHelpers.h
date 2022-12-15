@@ -6,23 +6,28 @@
 #pragma once
 
 #include "fabricrpc/Status.h"
-#include "fabricrpc.pb.h"
 #include "fabricrpc/FRPCTransportMessage.h"
+#include "fabricrpc/FRPCHeader.h"
 
 // some helpers for generated client code
 namespace fabricrpc {
 
 template<typename ProtoReq>
 Status ExecClientBegin(IFabricTransportClient * client,
+    std::shared_ptr<IFabricRPCHeaderProtoConverter> cv,
     std::string const & url,
     const ProtoReq* request,
     IFabricAsyncOperationCallback *callback, 
     /*out*/ IFabricAsyncOperationContext **context){
   HRESULT hr = S_OK;
+
+  fabricrpc::FabricRPCRequestHeader fRequestHeader;
   // prepare header
-  fabricrpc::request_header header;
-  header.set_url(url);
-  std::string header_str = header.SerializeAsString();
+  fRequestHeader.SetUrl(url);
+
+  std::string header_str;
+  bool ok = cv->SerializeRequestHeader(&fRequestHeader, &header_str);
+  assert(ok);
   // prepare body
   std::string body_str = request->SerializeAsString();
 
@@ -38,7 +43,9 @@ Status ExecClientBegin(IFabricTransportClient * client,
 }
 
 template<typename ResponseProto>
-Status ExecClientEnd(IFabricTransportClient * client, IFabricAsyncOperationContext *context, /*out*/ResponseProto* response){
+Status ExecClientEnd(IFabricTransportClient * client,
+    std::shared_ptr<IFabricRPCHeaderProtoConverter> cv,
+    IFabricAsyncOperationContext *context, /*out*/ResponseProto* response){
     HRESULT hr = S_OK;
     CComPtr<IFabricTransportMessage> reply;
     hr = client->EndRequest(context, &reply);
@@ -50,17 +57,18 @@ Status ExecClientEnd(IFabricTransportClient * client, IFabricAsyncOperationConte
     CComPtr<CComObjectNoLock<FRPCTransportMessage>> msgPtr(new CComObjectNoLock<FRPCTransportMessage>());
     msgPtr->CopyFrom(reply);
 
-    fabricrpc::reply_header header_reply;
     std::string const & header_str = msgPtr->GetHeader();
     if(header_str.size() == 0){
         return Status(StatusCode::UNKNOWN, "Server returned empty header");
     }
 
-    if(!header_reply.ParseFromString(header_str)){
+    fabricrpc::FabricRPCReplyHeader fReplyHeader;
+
+    if(!cv->DeserializeReplyHeader(&header_str, &fReplyHeader)){
         return Status(StatusCode::UNKNOWN, "Server returned bad header");
     }
-    if(header_reply.status_code() != 0){
-        return Status(StatusCode(header_reply.status_code()), header_reply.status_message());
+    if(fReplyHeader.GetStatusCode() != 0){
+        return Status(StatusCode(fReplyHeader.GetStatusCode()), fReplyHeader.GetStatusMessage());
     }
     // parse response
     if(!response->ParseFromString(msgPtr->GetBody())){

@@ -26,5 +26,6 @@
     <file src="build\src\Debug\fabric_rpc.*" target="content\lib\Debug" />
 
     <file src="include\**" target="content\include" />
+    <file src="protos\**" target="content\protos" />
   </files>
 </package>

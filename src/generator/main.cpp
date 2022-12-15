@@ -1,6 +1,7 @@
 // ------------------------------------------------------------
 // Copyright 2022 Youyuan Wu
-// Licensed under the MIT License (MIT). See License.txt in the repo root for license information.
+// Licensed under the MIT License (MIT). See License.txt in the repo root for
+// license information.
 // ------------------------------------------------------------
 
 // The code is based on protobuf generator code with the following copyright:
@@ -38,15 +39,14 @@
 #include <fcntl.h>
 #include <io.h> // setmode
 
-#include <google/protobuf/stubs/logging.h>
-#include <google/protobuf/stubs/common.h>
-#include <google/protobuf/compiler/plugin.pb.h>
 #include <google/protobuf/compiler/code_generator.h>
+#include <google/protobuf/compiler/plugin.pb.h>
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/descriptor.pb.h>
 #include <google/protobuf/io/io_win32.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
-
+#include <google/protobuf/stubs/common.h>
+#include <google/protobuf/stubs/logging.h>
 
 #include <iostream>
 
@@ -55,27 +55,26 @@ import gen;
 namespace pb = google::protobuf;
 namespace pbc = pb::compiler;
 
-
-bool GenerateCode(const pbc::CodeGeneratorRequest& request,
-                  const CodeGenerator& generator,
-                  pbc::CodeGeneratorResponse* response, std::string* error_msg) {
+bool GenerateCode(const pbc::CodeGeneratorRequest &request,
+                  const CodeGenerator &generator,
+                  pbc::CodeGeneratorResponse *response,
+                  std::string *error_msg) {
   pb::DescriptorPool pool;
   for (int i = 0; i < request.proto_file_size(); i++) {
-    const pb::FileDescriptor* file = pool.BuildFile(request.proto_file(i));
+    const pb::FileDescriptor *file = pool.BuildFile(request.proto_file(i));
     if (file == nullptr) {
       // BuildFile() already wrote an error message.
       return false;
     }
   }
 
-  std::vector<const pb::FileDescriptor*> parsed_files;
+  std::vector<const pb::FileDescriptor *> parsed_files;
   for (int i = 0; i < request.file_to_generate_size(); i++) {
     parsed_files.push_back(pool.FindFileByName(request.file_to_generate(i)));
     if (parsed_files.back() == nullptr) {
-      *error_msg =
-          "protoc asked plugin to generate a file but "
-          "did not provide a descriptor for the file: " +
-          request.file_to_generate(i);
+      *error_msg = "protoc asked plugin to generate a file but "
+                   "did not provide a descriptor for the file: " +
+                   request.file_to_generate(i);
       return false;
     }
   }
@@ -92,7 +91,7 @@ bool GenerateCode(const pbc::CodeGeneratorRequest& request,
   return true;
 }
 
-int main(int argc, char* argv[]){
+int main(int argc, char *argv[]) {
   if (argc > 1) {
     // TODO: support options.
     std::cerr << argv[0] << ": Unknown option: " << argv[1] << std::endl;
@@ -108,7 +107,7 @@ int main(int argc, char* argv[]){
 
   pbc::CodeGeneratorRequest request;
 
-  if (!request.ParseFromIstream(&std::cin)){
+  if (!request.ParseFromIstream(&std::cin)) {
     std::cerr << argv[0] << ": protoc sent unparseable request to plugin."
               << std::endl;
     return EXIT_FAILURE;
@@ -120,9 +119,9 @@ int main(int argc, char* argv[]){
   CodeGenerator generator;
 
   if (GenerateCode(request, generator, &response, &error_msg)) {
-    if(!response.SerializeToOstream(&std::cout)){
-        std::cerr << argv[0] << ": Error writing to stdout." << std::endl;
-        return EXIT_FAILURE; 
+    if (!response.SerializeToOstream(&std::cout)) {
+      std::cerr << argv[0] << ": Error writing to stdout." << std::endl;
+      return EXIT_FAILURE;
     }
   } else {
     if (!error_msg.empty()) {

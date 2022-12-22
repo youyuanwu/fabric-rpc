@@ -13,7 +13,7 @@ namespace fabricrpc{
 
 // atl implementation of transport message
 class FRPCTransportMessage : 
-  public CComObjectRootEx<CComSingleThreadModel>,
+  public CComObjectRootEx<CComMultiThreadModel>,
   public IFabricTransportMessage
 {
 
@@ -35,7 +35,7 @@ public:
 
   // copy content from another msg
   // if msg blob has multiple parts, this will concat all msg blobs into one
-  void CopyFrom(IFabricTransportMessage * other);
+  void CopyMsg(IFabricTransportMessage * other);
 
   const std::string & GetHeader();
   const std::string & GetBody();

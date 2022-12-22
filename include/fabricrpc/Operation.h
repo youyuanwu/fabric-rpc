@@ -14,6 +14,7 @@ namespace fabricrpc{
 class IBeginOperation{
 public:
     virtual Status Invoke(std::string body, IFabricAsyncOperationCallback *callback, /*out*/ IFabricAsyncOperationContext**context) = 0;
+    virtual ~IBeginOperation() = default;
 };
 
 template<typename T>
@@ -25,7 +26,7 @@ public:
     Status Invoke(std::string body, IFabricAsyncOperationCallback *callback, /*out*/ IFabricAsyncOperationContext**context) override {
         T req;
         // deserialize
-        bool ok = req.ParseFromArray(body.data(), static_cast<int>(body.size()));
+        bool ok = req.ParseFromString(body);
         if (!ok) {
             return Status(StatusCode::INVALID_ARGUMENT, "cannot parse body");
         }
@@ -38,6 +39,7 @@ private:
 class IEndOperation{
 public:
     virtual Status Invoke(IFabricAsyncOperationContext* context, std::string & reply) = 0;
+    virtual ~IEndOperation() = default;
 };
 
 template<typename T>
@@ -53,10 +55,11 @@ public:
             return err;
         }
         // serialize to reply
-        std::int32_t len = static_cast<std::int32_t>(proto.ByteSizeLong());
-        reply.resize(len, 0);
-        bool ok = proto.SerializeToArray(reply.data(), len);
-        assert(ok);
+        bool ok = proto.SerializeToString(&reply);
+        assert(ok); // This only happens in dbg mode
+        if (!ok) {
+            return Status(StatusCode::INTERNAL, "Server cannot serialize body.");
+        }
         return Status();
     }
 private:

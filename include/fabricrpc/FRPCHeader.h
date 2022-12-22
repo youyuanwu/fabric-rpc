@@ -44,6 +44,8 @@ public:
   virtual bool SerializeReplyHeader(const FabricRPCReplyHeader * reply, std::string * data) = 0;
   virtual bool DeserializeRequestHeader(const std::string * data, FabricRPCRequestHeader * request) = 0;
   virtual bool DeserializeReplyHeader(const std::string * data, FabricRPCReplyHeader * reply) = 0;
+
+  virtual ~IFabricRPCHeaderProtoConverter() = default;
 };
 
 template<typename RequestProto, typename ReplyProto>

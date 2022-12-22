@@ -57,7 +57,7 @@ void FRPCTransportMessage::Initialize(std::string header, std::string body) {
 
 // copy content from another msg
 // if msg blob has multiple parts, this will concat all msg blobs into one
-void FRPCTransportMessage::CopyFrom(IFabricTransportMessage *other) {
+void FRPCTransportMessage::CopyMsg(IFabricTransportMessage *other) {
   std::string body = get_body(other);
   std::string header = get_header(other);
   this->Initialize(std::move(header), std::move(body));

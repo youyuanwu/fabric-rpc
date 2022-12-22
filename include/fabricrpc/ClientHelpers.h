@@ -28,8 +28,16 @@ Status ExecClientBegin(IFabricTransportClient * client,
   std::string header_str;
   bool ok = cv->SerializeRequestHeader(&fRequestHeader, &header_str);
   assert(ok);
+  if (!ok) {
+    return Status(StatusCode::INTERNAL, "Client cannot serialize request header.");
+  }
   // prepare body
-  std::string body_str = request->SerializeAsString();
+  std::string body_str;
+  ok = request->SerializeToString(&body_str);
+  assert(ok);
+  if(!ok){
+    return Status(StatusCode::INTERNAL, "Client cannot serialize request body.");
+  }
 
   CComPtr<CComObjectNoLock<FRPCTransportMessage>> msgPtr(new CComObjectNoLock<FRPCTransportMessage>());
   msgPtr->Initialize(std::move(header_str), std::move(body_str));
@@ -55,7 +63,7 @@ Status ExecClientEnd(IFabricTransportClient * client,
 
     // copy request reply to fabric rpc impl
     CComPtr<CComObjectNoLock<FRPCTransportMessage>> msgPtr(new CComObjectNoLock<FRPCTransportMessage>());
-    msgPtr->CopyFrom(reply);
+    msgPtr->CopyMsg(reply);
 
     std::string const & header_str = msgPtr->GetHeader();
     if(header_str.size() == 0){

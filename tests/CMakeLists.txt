@@ -11,6 +11,7 @@ add_executable(${_test_name} ${_test_name}.cpp)
 target_link_libraries(${_test_name}
     PUBLIC Boost::unit_test_framework Boost::disable_autolinking
     PUBLIC fabric_headers
+    PUBLIC fabric_rpc
 )
 
 # target_compile_definitions(${_test_name}
@@ -32,6 +33,14 @@ target_link_libraries(fabric_rpc_base_test
   PUBLIC Boost::unit_test_framework Boost::disable_autolinking
   PUBLIC fabric_headers
   PUBLIC fabric_rpc
+  PUBLIC fabric_rpc_proto
 )
 add_test(NAME fabric_rpc_base_test COMMAND fabric_rpc_base_test
   WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+
+# target_compile_definitions(fabric_rpc_base_test
+#   PUBLIC WIN32_LEAN_AND_MEAN
+#   PUBLIC _WIN32_WINNT=0x601  # This is to pin the log version
+# )
+
+add_subdirectory(todolist)

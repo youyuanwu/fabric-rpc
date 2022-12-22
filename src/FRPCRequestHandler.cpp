@@ -18,9 +18,8 @@ namespace fabricrpc {
 // it shuold executes callbacks synchronously.
 // User needs to manually invoke callback out side the ctx.
 // This is used in fabric rpc to bailout failures.
-class SyncAsyncOperationContext
-    : public CComObjectRootEx<CComSingleThreadModel>,
-      public IFabricAsyncOperationContext {
+class SyncAsyncOperationContext : public CComObjectRootEx<CComMultiThreadModel>,
+                                  public IFabricAsyncOperationContext {
 
   BEGIN_COM_MAP(SyncAsyncOperationContext)
   COM_INTERFACE_ENTRY(IFabricAsyncOperationContext)
@@ -30,7 +29,7 @@ public:
   IFabricAsyncOperationContext *
   Initialize(IFabricAsyncOperationCallback *callback) {
     callback->AddRef();
-    callback_ = callback;
+    callback_.Attach(callback);
     // Note: callback is not invoked here.
     return this;
   }
@@ -53,7 +52,7 @@ private:
 };
 
 // wraps endoperation
-class AsyncEndOperationContext : public CComObjectRootEx<CComSingleThreadModel>,
+class AsyncEndOperationContext : public CComObjectRootEx<CComMultiThreadModel>,
                                  public IFabricAsyncOperationContext {
 
   BEGIN_COM_MAP(AsyncEndOperationContext)
@@ -64,8 +63,8 @@ public:
   IFabricAsyncOperationContext *
   Initialize(IFabricAsyncOperationContext *innerCtx,
              std::unique_ptr<IEndOperation> &&op, Status beginStatus) {
-    innerCtx->AddRef();
-    innerCtx_ = innerCtx;
+    // innerCtx->AddRef();
+    innerCtx_.Attach(innerCtx);
     op_ = std::move(op);
     beginStatus_ = std::move(beginStatus);
     return this;
@@ -92,8 +91,8 @@ public:
 
   IFabricAsyncOperationContext *get_InnerCtx() {
     // get a view of the ctx
-    CComPtr<IFabricAsyncOperationContext> innerCtxCopy = innerCtx_;
-    return innerCtxCopy.Detach();
+    // CComPtr<IFabricAsyncOperationContext> innerCtxCopy = innerCtx_;
+    return innerCtx_;
   }
 
   const Status &get_BeginStatus() const { return beginStatus_; }
@@ -152,20 +151,22 @@ HRESULT STDMETHODCALLTYPE FRPCRequestHandler::BeginProcessRequest(
     /* [in] */ DWORD timeoutMilliseconds,
     /* [in] */ IFabricAsyncOperationCallback *callback,
     /* [retval][out] */ IFabricAsyncOperationContext **context) {
+  UNREFERENCED_PARAMETER(clientId);
+  UNREFERENCED_PARAMETER(timeoutMilliseconds);
 
   assert(svc_ != nullptr); // must initialize
 
   // copy the message to fabric rpc implementation
   CComPtr<CComObjectNoLock<FRPCTransportMessage>> msgPtr(
       new CComObjectNoLock<FRPCTransportMessage>());
-  msgPtr->CopyFrom(message);
+  msgPtr->CopyMsg(message);
 
   const std::string &body = msgPtr->GetBody();
   const std::string &header = msgPtr->GetHeader();
 
   Status err; // The error to be sent back to client
-  CComPtr<IFabricAsyncOperationContext>
-      ctx; // context to be returned by the begin operation
+  // context to be returned by the begin operation
+  CComPtr<IFabricAsyncOperationContext> ctx;
   // begin and end ops to be looked up by routing.
   std::unique_ptr<IBeginOperation> beginOp;
   std::unique_ptr<IEndOperation> endOp;
@@ -201,13 +202,16 @@ HRESULT STDMETHODCALLTYPE FRPCRequestHandler::BeginProcessRequest(
     CComPtr<CComObjectNoLock<SyncAsyncOperationContext>> errCtx(
         new CComObjectNoLock<SyncAsyncOperationContext>());
     errCtx->Initialize(callback);
-    ctx = errCtx.Detach(); // transfer ownership.
+    ctx.Attach(errCtx.Detach()); // transfer ownership.
   }
+
+  assert(ctx != nullptr);
 
   // pass user end op and error
   CComPtr<CComObjectNoLock<AsyncEndOperationContext>> ctx_wrap2(
       new CComObjectNoLock<AsyncEndOperationContext>());
-  ctx_wrap2->Initialize(ctx, std::move(endOp), err);
+  // ctx_wrap2 takes ownership of ctx
+  ctx_wrap2->Initialize(ctx.Detach(), std::move(endOp), err);
 
   if (err) {
     // invoke the callback with the wrapped ctx.
@@ -221,9 +225,11 @@ HRESULT STDMETHODCALLTYPE FRPCRequestHandler::BeginProcessRequest(
 HRESULT STDMETHODCALLTYPE FRPCRequestHandler::EndProcessRequest(
     /* [in] */ IFabricAsyncOperationContext *context,
     /* [retval][out] */ IFabricTransportMessage **reply) {
+
   // get the packed additional info
   CComObjectNoLock<AsyncEndOperationContext> *ctx_wrap2 =
       dynamic_cast<CComObjectNoLock<AsyncEndOperationContext> *>(context);
+  assert(ctx_wrap2 != nullptr);
 
   fabricrpc::FabricRPCReplyHeader fReplyHeader;
   std::string reply_str;
@@ -250,6 +256,7 @@ HRESULT STDMETHODCALLTYPE FRPCRequestHandler::EndProcessRequest(
   std::string h_response_str;
   bool ok = cv_->SerializeReplyHeader(&fReplyHeader, &h_response_str);
   assert(ok);
+  DBG_UNREFERENCED_LOCAL_VARIABLE(ok);
 
   // create com msg
   CComPtr<CComObjectNoLock<FRPCTransportMessage>> msgPtr(
@@ -262,6 +269,8 @@ HRESULT STDMETHODCALLTYPE FRPCRequestHandler::EndProcessRequest(
 HRESULT STDMETHODCALLTYPE FRPCRequestHandler::HandleOneWay(
     /* [in] */ COMMUNICATION_CLIENT_ID clientId,
     /* [in] */ IFabricTransportMessage *message) {
+  UNREFERENCED_PARAMETER(clientId);
+  UNREFERENCED_PARAMETER(message);
   // BOOST_LOG_TRIVIAL(debug) << "request_handler::HandleOneWay";
   return S_OK;
 }

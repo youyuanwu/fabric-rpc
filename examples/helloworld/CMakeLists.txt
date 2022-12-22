@@ -1,5 +1,6 @@
 set (CMAKE_CXX_STANDARD 20)
 
+set(Boost_NO_WARN_NEW_VERSIONS 1)
 set(Boost_USE_STATIC_LIBS ON) # use static boost
 find_package(Boost REQUIRED COMPONENTS log) # log is used for tests
 
@@ -47,7 +48,6 @@ target_link_libraries(${_hello_lib}
     fabric_error
     fabric_ext
     fabric_internal_ext
-    fabric_rpc_proto
     Boost::log Boost::disable_autolinking Boost::headers
 )
 

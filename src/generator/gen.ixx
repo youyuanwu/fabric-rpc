@@ -237,6 +237,9 @@ public:
       vars["Method"] = method->name();
       vars["Request"] = method->input_type()->name();
       vars["Response"] = method->output_type()->name();
+      if(i != 0){
+        p.Add("else ");
+      }
       p.Add(vars, "if (url == \"/$Package$$Service$/$Method$\") {\n");
       p.Indent();
       p.Add(vars,
@@ -247,8 +250,9 @@ public:
         "beginOp = std::make_unique<fabricrpc::BeginOperation<$Request$>>(bo);\n"
         "endOp = std::make_unique<fabricrpc::EndOperation<$Response$>>(eo);\n");
       p.Outdent();
+      p.Add("}"); // TODO: the new line is ugly
     }
-    p.Add("} else {\n"
+    p.Add("else {\n"
         "  return fabricrpc::Status(fabricrpc::StatusCode::NOT_FOUND, \"method not found: \" + url);\n"
         "}\n"
     );

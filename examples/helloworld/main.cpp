@@ -66,20 +66,21 @@ int main() {
     return EXIT_FAILURE;
   }
   // open listener
-  belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-      sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-  belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
-  hr = listener->BeginOpen(callback.get(), ctx.put());
-  if (hr != S_OK) {
-    return EXIT_FAILURE;
-  }
-  callback->Wait();
   belt::com::com_ptr<IFabricStringResult> addr_str;
-  hr = listener->EndOpen(ctx.get(), addr_str.put());
-  if (hr != S_OK) {
-    return EXIT_FAILURE;
+  {
+    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
+        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
+    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    hr = listener->BeginOpen(callback.get(), ctx.put());
+    if (hr != S_OK) {
+      return EXIT_FAILURE;
+    }
+    callback->Wait();
+    hr = listener->EndOpen(ctx.get(), addr_str.put());
+    if (hr != S_OK) {
+      return EXIT_FAILURE;
+    }
   }
-
   std::wcout << L"Listening on: " << std::wstring(addr_str->get_String());
 
   // wait for ctl-c TODO

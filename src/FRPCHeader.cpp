@@ -2,7 +2,7 @@
 
 namespace fabricrpc {
 
-FabricRPCRequestHeader::FabricRPCRequestHeader() : FabricRPCRequestHeader("") {}
+FabricRPCRequestHeader::FabricRPCRequestHeader() : url_() {}
 
 FabricRPCRequestHeader::FabricRPCRequestHeader(const std::string &url)
     : url_(url) {}

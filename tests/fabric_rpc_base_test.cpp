@@ -5,6 +5,19 @@
 #include "fabricrpc/FRPCHeader.h"
 #include <memory>
 
+// global fixture to tear down protobuf
+// protobuf has internal memories that needs to be freed before exit program
+struct MyGlobalFixture {
+  MyGlobalFixture() { BOOST_TEST_MESSAGE("ctor fixture"); }
+  void setup() { BOOST_TEST_MESSAGE("setup fixture"); }
+  void teardown() { BOOST_TEST_MESSAGE("teardown fixture"); }
+  ~MyGlobalFixture() {
+    google::protobuf::ShutdownProtobufLibrary();
+    BOOST_TEST_MESSAGE("dtor fixture");
+  }
+};
+BOOST_TEST_GLOBAL_FIXTURE(MyGlobalFixture);
+
 using testconverter =
     fabricrpc::FabricRPCHeaderProtoConverter<fabricrpc::request_header,
                                              fabricrpc::reply_header>;

@@ -19,7 +19,7 @@
 namespace fabricrpc{
 
 class FRPCRequestHandler
-  : public CComObjectRootEx<CComSingleThreadModel>,
+  : public CComObjectRootEx<CComMultiThreadModel>,
     public IFabricTransportMessageHandler {
 BEGIN_COM_MAP(FRPCRequestHandler)
   COM_INTERFACE_ENTRY(IFabricTransportMessageHandler)

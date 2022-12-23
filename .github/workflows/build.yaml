@@ -16,11 +16,11 @@ jobs:
     - name: Get MSVC
       uses: ilammy/msvc-dev-cmd@v1
 
-    - name: Get specific version CMake, v3.21.2
-      uses: lukka/get-cmake@v3.21.2
+    - name: Get specific version CMake
+      uses: lukka/get-cmake@v3.25.1
     
     - name: Get Boost
-      uses: MarkusJx/install-boost@v2.3.0
+      uses: MarkusJx/install-boost@v2.4.1
       id: install-boost
       with:
         # REQUIRED: Specify the required boost version
@@ -45,3 +45,15 @@ jobs:
     
     - name: run test
       run: ctest -C ${{ matrix.BUILD_TYPE }} --test-dir build --verbose --repeat until-pass:3 --timeout 30
+
+    - name: run some bench tests
+      run: .\build\tests\helloworld_bench\${{ matrix.BUILD_TYPE }}\helloworld_bench.exe -- --concurrency 100 --connections 100 --test_sec 5
+    
+    - name: run some bench tests
+      run: .\build\tests\helloworld_bench\${{ matrix.BUILD_TYPE }}\helloworld_bench.exe --detect_memory_leaks=0 -- --concurrency 100 --connections 1000 --test_sec 5
+
+    - name: run some bench tests
+      run: .\build\tests\helloworld_bench\${{ matrix.BUILD_TYPE }}\helloworld_bench.exe --detect_memory_leaks=0 -- --concurrency 100 --connections 1000 --test_sec 5
+
+    - name: run some bench tests
+      run: .\build\tests\helloworld_bench\${{ matrix.BUILD_TYPE }}\helloworld_bench.exe --detect_memory_leaks=0 -- --concurrency 1000 --connections 50 --test_sec 30

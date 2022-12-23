@@ -17,6 +17,8 @@
 #include "servicefabric/fabric_error.hpp"
 #include "todolist.fabricrpc.h"
 
+#include "fabricrpc_test_helpers.hpp"
+
 // global fixture to tear down protobuf
 // protobuf has internal memories that needs to be freed before exit program
 struct MyGlobalFixture {
@@ -41,8 +43,14 @@ BOOST_AUTO_TEST_SUITE(test_todolist)
 // }
 
 BOOST_AUTO_TEST_CASE(test_1) {
+  std::shared_ptr<fabricrpc::MiddleWare> todo_svc =
+      std::make_shared<TodoList_Impl>();
+
+  belt::com::com_ptr<IFabricTransportMessageHandler> req_handler;
+  todolist::CreateFabricRPCRequestHandler({todo_svc}, req_handler.put());
+
   myserver s;
-  HRESULT hr = s.StartServer();
+  HRESULT hr = s.StartServer(req_handler);
   BOOST_REQUIRE_EQUAL(hr, S_OK);
 
   myclient c;

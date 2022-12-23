@@ -44,3 +44,4 @@ add_test(NAME fabric_rpc_base_test COMMAND fabric_rpc_base_test
 # )
 
 add_subdirectory(todolist)
+add_subdirectory(helloworld_bench)

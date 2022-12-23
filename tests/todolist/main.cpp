@@ -192,33 +192,27 @@ BOOST_AUTO_TEST_CASE(test_sync_invoke) {
     BOOST_REQUIRE_EQUAL(hr, S_OK);
   }
 
-  // This block is disabled.
   // send dummy message using proper callback.
-  // {
-  //   CComPtr<CComObjectNoLock<MyTestCallback>> callback(new
-  //   CComObjectNoLock<MyTestCallback>());
-  //   callback->Initialize(req_handler.get());
+  {
+    CComPtr<CComObjectNoLock<MyTestCallback>> callback(
+        new CComObjectNoLock<MyTestCallback>());
+    callback->Initialize(req_handler.get());
 
-  //   belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
 
-  //   fabricrpc::request_header header;
-  //   todolist::FindRequest body;
+    fabricrpc::request_header header;
+    todolist::FindRequest body;
 
-  //   header.set_url("/todolist.Todo/Find");
+    header.set_url("/todolist.Todo/Find");
 
-  //   // This is a limitation of the fabric rpc impl.
-  //   // This will hit the assert.
-  //   // The callback here is executed on the user ctx in svc impl
-  //   // and the ctx is sync so the unwrapped ctx gets passed into this
-  //   callback
-  //   // and fabricrpc has no way to get the additional routing from the wrap.
-
-  //   belt::com::com_ptr<IFabricTransportMessage> msg =
-  //       sf::transport_message::create_instance(body.SerializeAsString(),
-  //       header.SerializeAsString()).to_ptr();
-  //   HRESULT hr = req_handler->BeginProcessRequest(id, msg.get(), 1000,
-  //   callback, ctx.put()); BOOST_REQUIRE_EQUAL(hr, S_OK);
-  // }
+    belt::com::com_ptr<IFabricTransportMessage> msg =
+        sf::transport_message::create_instance(body.SerializeAsString(),
+                                               header.SerializeAsString())
+            .to_ptr();
+    HRESULT hr = req_handler->BeginProcessRequest(id, msg.get(), 1000, callback,
+                                                  ctx.put());
+    BOOST_REQUIRE_EQUAL(hr, S_OK);
+  }
 }
 
 // TODO: mem leak due to msg disposer not freed.

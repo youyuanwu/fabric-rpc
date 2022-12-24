@@ -11,8 +11,8 @@
 #include <atlbase.h>
 #include <atlcom.h>
 
-#include "fabricrpc/FRPCTransportMessage.h"
-#include "fabricrpc/Status.h"
+#include "fabricrpc/FRPCTransportMessage.hpp"
+#include "fabricrpc/Status.hpp"
 
 class async_wapping_context2 : public CComObjectRootEx<CComSingleThreadModel>,
                                public IFabricAsyncOperationContext {

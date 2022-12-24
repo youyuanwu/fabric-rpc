@@ -4,7 +4,7 @@
 // license information.
 // ------------------------------------------------------------
 
-#include "fabricrpc/FRPCTransportMessage.h"
+#include "fabricrpc/FRPCTransportMessage.hpp"
 #include <cassert>
 
 namespace fabricrpc {

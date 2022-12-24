@@ -4,7 +4,7 @@
 // license information.
 // ------------------------------------------------------------
 
-#include "fabricrpc/Status.h"
+#include "fabricrpc/Status.hpp"
 
 namespace fabricrpc {
 

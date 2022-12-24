@@ -64,6 +64,6 @@ target_link_libraries(${_client_exe} PRIVATE ${_hello_lib})
 # target to replace generated code.
 add_custom_target(hello_world_replace_manual_code
   DEPENDS ${FABRIC_RPC_SRCS}
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/helloworld.fabricrpc.h ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.gen.h
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/helloworld.fabricrpc.h ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.gen.hpp
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/helloworld.fabricrpc.cc ${CMAKE_CURRENT_SOURCE_DIR}/helloworld.gen.cpp
 )

@@ -4,10 +4,10 @@
 // license information.
 // ------------------------------------------------------------
 
-#include "fabricrpc/FRPCRequestHandler.h"
-#include "fabricrpc/FRPCTransportMessage.h"
-#include "fabricrpc/Operation.h"
-#include "fabricrpc/exp/AsyncAnyContext.h"
+#include "fabricrpc/FRPCRequestHandler.hpp"
+#include "fabricrpc/FRPCTransportMessage.hpp"
+#include "fabricrpc/Operation.hpp"
+#include "fabricrpc/exp/AsyncAnyContext.hpp"
 
 #include <cassert>
 #include <memory>

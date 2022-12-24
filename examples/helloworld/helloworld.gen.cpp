@@ -25,8 +25,9 @@ fabricrpc::Status FabricHello::Service::Route(
   }
   return fabricrpc::Status();
 }
-void CreateFabricRPCRequestHandler(std::shared_ptr<fabricrpc::MiddleWare> svc,
-                                   IFabricTransportMessageHandler **handler) {
+void CreateFabricRPCRequestHandler(
+    const std::vector<std::shared_ptr<fabricrpc::MiddleWare>> &svcList,
+    IFabricTransportMessageHandler **handler) {
   using privateconverter =
       fabricrpc::FabricRPCHeaderProtoConverter<fabricrpc::request_header,
                                                fabricrpc::reply_header>;
@@ -34,7 +35,7 @@ void CreateFabricRPCRequestHandler(std::shared_ptr<fabricrpc::MiddleWare> svc,
       std::make_shared<privateconverter>();
   CComPtr<CComObjectNoLock<fabricrpc::FRPCRequestHandler>> msgHandlerPtr(
       new CComObjectNoLock<fabricrpc::FRPCRequestHandler>());
-  msgHandlerPtr->Initialize(svc, cv);
+  msgHandlerPtr->Initialize(svcList, cv);
   *handler = msgHandlerPtr.Detach();
 }
 } // namespace helloworld

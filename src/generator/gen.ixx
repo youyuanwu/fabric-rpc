@@ -129,8 +129,8 @@ public:
       "#include \"fabrictransport_.h\"\n"
       "#include <atlbase.h>\n"
       "#include <atlcom.h>\n"
-      "#include \"fabricrpc/Operation.h\"\n"
-      "#include \"fabricrpc/FRPCHeader.h\"\n" // TODO: see if possible to get rid of this.
+      "#include \"fabricrpc/Operation.hpp\"\n"
+      "#include \"fabricrpc/FRPCHeader.hpp\"\n" // TODO: see if possible to get rid of this.
     );
 
     std::string services_code = GetHeaderServices(file_);
@@ -325,9 +325,9 @@ public:
     // fabric rpc required headers
     p.Add(
       "#include <functional>\n"
-      "#include \"fabricrpc/ClientHelpers.h\"\n"
-      "#include \"fabricrpc/FRPCRequestHandler.h\"\n"
-      "#include \"fabricrpc/FRPCHeader.h\"\n"
+      "#include \"fabricrpc/ClientHelpers.hpp\"\n"
+      "#include \"fabricrpc/FRPCRequestHandler.hpp\"\n"
+      "#include \"fabricrpc/FRPCHeader.hpp\"\n"
     );
     
     std::string services_cc_code = GetCCServices(file_);

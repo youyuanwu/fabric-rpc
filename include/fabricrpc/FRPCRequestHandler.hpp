@@ -1,6 +1,7 @@
 // ------------------------------------------------------------
 // Copyright 2022 Youyuan Wu
-// Licensed under the MIT License (MIT). See License.txt in the repo root for license information.
+// Licensed under the MIT License (MIT). See License.txt in the repo root for
+// license information.
 // ------------------------------------------------------------
 
 #pragma once
@@ -10,24 +11,24 @@
 
 #include "fabrictransport_.h"
 
-#include "fabricrpc/Operation.h"
-#include "fabricrpc/FRPCHeader.h"
+#include "fabricrpc/FRPCHeader.hpp"
+#include "fabricrpc/Operation.hpp"
 
 #include <memory>
 #include <vector>
 
-namespace fabricrpc{
+namespace fabricrpc {
 
-class FRPCRequestHandler
-  : public CComObjectRootEx<CComMultiThreadModel>,
-    public IFabricTransportMessageHandler {
-BEGIN_COM_MAP(FRPCRequestHandler)
+class FRPCRequestHandler : public CComObjectRootEx<CComMultiThreadModel>,
+                           public IFabricTransportMessageHandler {
+  BEGIN_COM_MAP(FRPCRequestHandler)
   COM_INTERFACE_ENTRY(IFabricTransportMessageHandler)
-END_COM_MAP()
+  END_COM_MAP()
 
 public:
   FRPCRequestHandler();
-  void Initialize(const std::vector<std::shared_ptr<MiddleWare>> & svcList, std::shared_ptr<IFabricRPCHeaderProtoConverter> cv);
+  void Initialize(const std::vector<std::shared_ptr<MiddleWare>> &svcList,
+                  std::shared_ptr<IFabricRPCHeaderProtoConverter> cv);
 
   HRESULT STDMETHODCALLTYPE BeginProcessRequest(
       /* [in] */ COMMUNICATION_CLIENT_ID clientId,
@@ -43,9 +44,10 @@ public:
   HRESULT STDMETHODCALLTYPE HandleOneWay(
       /* [in] */ COMMUNICATION_CLIENT_ID clientId,
       /* [in] */ IFabricTransportMessage *message) override;
+
 private:
-    std::shared_ptr<MiddleWare> svc_;
-    std::shared_ptr<IFabricRPCHeaderProtoConverter> cv_;
+  std::shared_ptr<MiddleWare> svc_;
+  std::shared_ptr<IFabricRPCHeaderProtoConverter> cv_;
 };
 
 } // namespace fabricrpc

@@ -1,6 +1,11 @@
+// ------------------------------------------------------------
+// Copyright 2022 Youyuan Wu
+// Licensed under the MIT License (MIT). See License.txt in the repo root for
+// license information.
+// ------------------------------------------------------------
+
 module;
 #include "FabricCommon.h"
-#include "fabricrpc/Status.h"
 
 #ifdef SF_MANUAL
 #include "helloworld.gen.h"

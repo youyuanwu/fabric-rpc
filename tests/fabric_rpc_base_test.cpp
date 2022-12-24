@@ -1,8 +1,14 @@
+// ------------------------------------------------------------
+// Copyright 2022 Youyuan Wu
+// Licensed under the MIT License (MIT). See License.txt in the repo root for
+// license information.
+// ------------------------------------------------------------
+
 #define BOOST_TEST_MODULE fabric_rpc_test
 #include <boost/test/unit_test.hpp>
 
 #include "fabricrpc.pb.h"
-#include "fabricrpc/FRPCHeader.h"
+#include "fabricrpc/FRPCHeader.hpp"
 #include <memory>
 
 // global fixture to tear down protobuf

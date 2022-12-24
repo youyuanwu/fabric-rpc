@@ -1,11 +1,12 @@
 // ------------------------------------------------------------
 // Copyright 2022 Youyuan Wu
-// Licensed under the MIT License (MIT). See License.txt in the repo root for license information.
+// Licensed under the MIT License (MIT). See License.txt in the repo root for
+// license information.
 // ------------------------------------------------------------
 
 #pragma once
 
-namespace fabricrpc{
+namespace fabricrpc {
 // status code that mimicks grpc status code
 enum StatusCode {
   OK = 0,
@@ -20,4 +21,4 @@ enum StatusCode {
   FABRIC_TRANSPORT_ERROR = 50,
   DO_NOT_USE = -1
 };
-}// namespace fabricrpc
+} // namespace fabricrpc

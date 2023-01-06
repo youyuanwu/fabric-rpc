@@ -24,17 +24,19 @@ export module helloworld.tools;
 
 // any_context allow user to store any in the ctx.
 // std::any is owned by this ctx.
+// User needs to invoke the callback.
 class async_any_context
     : public belt::com::object<async_any_context,
                                IFabricAsyncOperationContext> {
 public:
   async_any_context(IFabricAsyncOperationCallback *callback, std::any &&a)
       : callback_(callback), a_(std::move(a)) {
-#ifdef SF_DEBUG
-    BOOST_LOG_TRIVIAL(debug) << "async_context::async_context";
-#endif
-    // invoke callback
-    callback_->Invoke(this);
+    // we cannot not invoke callback in the constructor, because
+    // this ctx might be invoked with a callback synchronously but the ctx has
+    // not finished construction.
+    // This is specifically for belt::com lib. We first construct object in a
+    // holder and not yet created the com ptr, so calling callback->Invoke(this)
+    // is undefined.
   }
   /*IFabricAsyncOperationContext members*/
   BOOLEAN STDMETHODCALLTYPE IsCompleted() override { return true; }
@@ -64,6 +66,7 @@ public:
     std::any a = std::move(msg);
     belt::com::com_ptr<IFabricAsyncOperationContext> ctx =
         async_any_context::create_instance(callback, std::move(a)).to_ptr();
+    callback->Invoke(ctx.get());
     *context = ctx.detach();
     return fabricrpc::Status();
   }

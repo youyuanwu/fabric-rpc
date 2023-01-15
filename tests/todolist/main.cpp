@@ -94,6 +94,33 @@ BOOST_AUTO_TEST_CASE(test_1) {
 
   // test special error cases. TODO: more error cases
 
+  // Send empty header to server
+  {
+    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
+        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
+    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    belt::com::com_ptr<IFabricTransportMessage> msg =
+        sf::transport_message::create_instance("mybody", "").to_ptr();
+    hr =
+        c.GetClient()->BeginRequest(msg.get(), 1000, callback.get(), ctx.put());
+    BOOST_REQUIRE_EQUAL(hr, S_OK);
+    callback->Wait();
+    belt::com::com_ptr<IFabricTransportMessage> reply;
+    hr = c.GetClient()->EndRequest(ctx.get(), reply.put());
+    BOOST_REQUIRE_EQUAL(hr, S_OK);
+
+    std::string body = sf::get_body(reply.get());
+    std::string headers = sf::get_header(reply.get());
+    fabricrpc::reply_header h_reply;
+    bool ok = h_reply.ParseFromString(headers);
+    BOOST_REQUIRE(ok);
+    BOOST_CHECK_EQUAL(h_reply.status_code(),
+                      fabricrpc::StatusCode::INVALID_ARGUMENT);
+    BOOST_CHECK_EQUAL(h_reply.status_message(),
+                      "fabric rpc header is empty");
+    BOOST_CHECK_EQUAL(body.size(), 0);    
+  }
+
   // Send some bad header to server
   // server should reply with payload with detailed error info
   {

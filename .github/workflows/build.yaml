@@ -34,6 +34,14 @@ jobs:
     # assume sf runtime is installed in github runner
     # - name: check sf exist
     #   run: Powershell.exe -File .\scripts\check_sf_installed.ps1
+    - name: Get OpenCppCoverage
+      if: ${{ matrix.BUILD_TYPE == 'Debug' }}
+      env:
+        myUrl: "https://github.com/OpenCppCoverage/OpenCppCoverage/releases/download/release-0.9.9.0/OpenCppCoverageSetup-x64-0.9.9.0.exe"
+      run: |
+        powershell.exe -Command "Invoke-WebRequest $env:myUrl -OutFile $env:Temp/OpenCppCoverageSetup-x64-0.9.9.0.exe"
+        powershell.exe -Command "& $env:Temp/OpenCppCoverageSetup-x64-0.9.9.0.exe /silent"
+        powershell.exe -Command "Add-Content $env:GITHUB_PATH 'C:\Program Files\OpenCppCoverage'"
 
     - name: run cmake
       env:
@@ -46,6 +54,13 @@ jobs:
     - name: run test
       run: ctest -C ${{ matrix.BUILD_TYPE }} --test-dir build --verbose --repeat until-pass:3 --timeout 30
 
+    - name: run test with coverage
+      if: ${{ matrix.BUILD_TYPE == 'Debug' }}
+      run: >
+        OpenCppCoverage.exe --quiet --export_type cobertura:cobertura.xml --cover_children 
+        --sources ${PWD}\src --sources ${PWD}\include --modules ${PWD} 
+        -- ctest -C Debug --test-dir build --verbose --repeat until-pass:3 --timeout 30
+
     - name: run some bench tests
       run: .\build\tests\helloworld_bench\${{ matrix.BUILD_TYPE }}\helloworld_bench.exe -- --concurrency 100 --connections 100 --test_sec 5
     
@@ -57,3 +72,11 @@ jobs:
 
     - name: run some bench tests
       run: .\build\tests\helloworld_bench\${{ matrix.BUILD_TYPE }}\helloworld_bench.exe --detect_memory_leaks=0 -- --concurrency 1000 --connections 50 --test_sec 30
+
+    - name: Upload Report to Codecov
+      if: ${{ matrix.BUILD_TYPE == 'Debug' }}
+      uses: codecov/codecov-action@v2
+      with:
+        files: ./cobertura.xml
+        fail_ci_if_error: true
+        functionalities: fix

@@ -6,6 +6,9 @@
 
 #pragma once
 
+#include <atlbase.h>
+#include <atlcom.h>
+
 #include "servicefabric/async_context.hpp"
 #include "servicefabric/fabric_error.hpp"
 #include "servicefabric/transport_dummy_client_conn_handler.hpp"
@@ -130,10 +133,11 @@ public:
     settings.OperationTimeoutInSeconds = 30;
     settings.SecurityCredentials = &cred;
 
+    // This can mem leak if fabric transport request call fails.
     belt::com::com_ptr<IFabricTransportCallbackMessageHandler> client_notify_h =
         sf::transport_dummy_client_notification_handler::create_instance()
             .to_ptr();
-
+    // This can mem leak if fabric transport request call fails.
     belt::com::com_ptr<IFabricTransportClientEventHandler> client_event_h =
         sf::transport_dummy_client_conn_handler::create_instance().to_ptr();
     // mem leak here. allo block 7929 in cmd or 7934 in debugger.

@@ -30,7 +30,7 @@ Status::operator bool() const { return this->code_ != StatusCode::OK; }
 bool Status::IsTransportError() {
   return this->code_ == StatusCode::FABRIC_TRANSPORT_ERROR;
 }
-HRESULT Status::GetTransportErrorMessage() const {
+HRESULT Status::GetTransportErrorCode() const {
   return this->transportErrorCode_;
 }
 

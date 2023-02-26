@@ -7,6 +7,7 @@
 #pragma once
 
 #include "fabricrpc/Status.hpp"
+#include <chrono>
 #include <functional>
 #include <memory>
 
@@ -14,7 +15,7 @@ namespace fabricrpc {
 
 class IBeginOperation {
 public:
-  virtual Status Invoke(std::string body,
+  virtual Status Invoke(std::string body, DWORD timeoutMilliseconds,
                         IFabricAsyncOperationCallback *callback,
                         /*out*/ IFabricAsyncOperationContext **context) = 0;
   virtual ~IBeginOperation() = default;
@@ -23,24 +24,38 @@ public:
 template <typename T> class BeginOperation : public IBeginOperation {
 public:
   BeginOperation(
-      std::function<Status(const T *, IFabricAsyncOperationCallback *,
+      std::function<Status(const T *, DWORD, IFabricAsyncOperationCallback *,
                            /*out*/ IFabricAsyncOperationContext **)>
           op)
       : op_(op) {}
 
-  Status Invoke(std::string body, IFabricAsyncOperationCallback *callback,
+  Status Invoke(std::string body, DWORD timeoutMilliseconds,
+                IFabricAsyncOperationCallback *callback,
                 /*out*/ IFabricAsyncOperationContext **context) override {
+    // calculate new timeout. Parsing may take some time if payload is big.
+    auto starttime = std::chrono::steady_clock::now();
+
     T req;
     // deserialize
     bool ok = req.ParseFromString(body);
     if (!ok) {
       return Status(StatusCode::INVALID_ARGUMENT, "cannot parse body");
     }
-    return op_(&req, callback, context);
+
+    // prepare timeout value
+    auto endtime = std::chrono::steady_clock::now();
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(endtime -
+                                                                    starttime)
+                  .count();
+    DWORD newTimeout = {};
+    if (timeoutMilliseconds > ms) {
+      newTimeout = timeoutMilliseconds - static_cast<DWORD>(ms);
+    }
+    return op_(&req, newTimeout, callback, context);
   }
 
 private:
-  std::function<Status(const T *, IFabricAsyncOperationCallback *,
+  std::function<Status(const T *, DWORD, IFabricAsyncOperationCallback *,
                        /*out*/ IFabricAsyncOperationContext **)>
       op_;
 };

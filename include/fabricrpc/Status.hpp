@@ -27,7 +27,7 @@ public:
   operator bool() const;
 
   bool IsTransportError();
-  HRESULT GetTransportErrorMessage() const;
+  HRESULT GetTransportErrorCode() const;
 
 private:
   StatusCode code_;

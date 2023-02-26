@@ -101,7 +101,7 @@ int main() {
 
     fabricrpc::Status err;
 
-    err = h_client.BeginSayHello(&request, callback.get(), ctx.put());
+    err = h_client.BeginSayHello(&request, 1000, callback.get(), ctx.put());
     if (err) {
       BOOST_LOG_TRIVIAL(debug) << "BeginSayHello Failed " << err;
       return EXIT_FAILURE;

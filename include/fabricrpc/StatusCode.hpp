@@ -12,6 +12,7 @@ enum StatusCode {
   OK = 0,
   UNKNOWN = 2,
   INVALID_ARGUMENT = 3,
+  DEADLINE_EXCEEDED = 4,
   NOT_FOUND = 5,
   INTERNAL = 13,
   // fabric rpc custom error code

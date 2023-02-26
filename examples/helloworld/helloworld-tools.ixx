@@ -60,8 +60,11 @@ export class Service_Impl : public helloworld::FabricHello::Service {
 public:
   fabricrpc::Status
   BeginSayHello(const ::helloworld::FabricRequest *request,
+                DWORD timeoutMilliseconds,
                 IFabricAsyncOperationCallback *callback,
                 /*out*/ IFabricAsyncOperationContext **context) override {
+    UNREFERENCED_PARAMETER(timeoutMilliseconds);
+    std::cout << timeoutMilliseconds << std::endl;
     std::string msg = "hello " + request->fabricname();
     std::any a = std::move(msg);
     belt::com::com_ptr<IFabricAsyncOperationContext> ctx =

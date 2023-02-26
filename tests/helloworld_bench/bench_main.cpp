@@ -20,8 +20,10 @@ class Service_Impl : public helloworld::FabricHello::Service {
 public:
   fabricrpc::Status
   BeginSayHello(const ::helloworld::FabricRequest *request,
+                DWORD timeoutMilliseconds,
                 IFabricAsyncOperationCallback *callback,
                 /*out*/ IFabricAsyncOperationContext **context) override {
+    UNREFERENCED_PARAMETER(timeoutMilliseconds);
     std::string msg = "hello " + request->fabricname();
 
     CComPtr<CComObjectNoLock<fabricrpc::AsyncAnyCtx<std::string>>> ctxPtr(
@@ -167,7 +169,7 @@ void start_one_client(std::atomic<int> &successcount,
     belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
     helloworld::FabricRequest req;
     req.set_fabricname("myname");
-    hr = hc.BeginSayHello(&req, callback.get(), ctx.put());
+    hr = hc.BeginSayHello(&req, 1000, callback.get(), ctx.put());
     if (hr != S_OK) {
       BOOST_TEST_MESSAGE("BeginSayHello Error: " +
                          sf::get_fabric_error_str(hr));

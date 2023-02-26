@@ -10,16 +10,22 @@
 #include "fabricrpc/FRPCTransportMessage.hpp"
 #include "fabricrpc/Status.hpp"
 
+#include <chrono>
+
 // some helpers for generated client code
 namespace fabricrpc {
 
 template <typename ProtoReq>
 Status ExecClientBegin(IFabricTransportClient *client,
                        std::shared_ptr<IFabricRPCHeaderProtoConverter> cv,
-                       std::string const &url, const ProtoReq *request,
+                       DWORD timeoutMilliseconds, std::string const &url,
+                       const ProtoReq *request,
                        IFabricAsyncOperationCallback *callback,
                        /*out*/ IFabricAsyncOperationContext **context) {
   HRESULT hr = S_OK;
+
+  // calculate new timeout. Parsing may take some time if payload is big.
+  auto starttime = std::chrono::steady_clock::now();
 
   fabricrpc::FabricRPCRequestHeader fRequestHeader;
   // prepare header
@@ -45,8 +51,18 @@ Status ExecClientBegin(IFabricTransportClient *client,
       new CComObjectNoLock<FRPCTransportMessage>());
   msgPtr->Initialize(std::move(header_str), std::move(body_str));
 
+  // prepare timeout value
+  auto endtime = std::chrono::steady_clock::now();
+  auto ms =
+      std::chrono::duration_cast<std::chrono::milliseconds>(endtime - starttime)
+          .count();
+  DWORD newTimeout = {};
+  if (timeoutMilliseconds > ms) {
+    newTimeout = timeoutMilliseconds - static_cast<DWORD>(ms);
+  }
+
   // send request
-  hr = client->BeginRequest(msgPtr, 1000, callback, context);
+  hr = client->BeginRequest(msgPtr, newTimeout, callback, context);
   if (FAILED(hr)) {
     return Status(StatusCode::FABRIC_TRANSPORT_ERROR, "BeginRequest failed",
                   hr);

@@ -47,10 +47,11 @@ public:
   TodoList_Impl() : items_() {}
 
   fabricrpc::Status
-  BeginFind(const todolist::FindRequest *request,
+  BeginFind(const todolist::FindRequest *request, DWORD timeoutMilliseconds,
             IFabricAsyncOperationCallback *callback,
             /*out*/ IFabricAsyncOperationContext **context) override {
     UNREFERENCED_PARAMETER(request);
+    UNREFERENCED_PARAMETER(timeoutMilliseconds);
 
     // there is no content passed to the end needed. pass a string for testing
     CComPtr<CComObjectNoLock<fabricrpc::AsyncAnyCtx<std::string>>> ctxPtr(
@@ -81,9 +82,10 @@ public:
   }
 
   fabricrpc::Status
-  BeginAddOne(const todolist::AddOneRequest *request,
+  BeginAddOne(const todolist::AddOneRequest *request, DWORD timeoutMilliseconds,
               IFabricAsyncOperationCallback *callback,
               /*out*/ IFabricAsyncOperationContext **context) override {
+    UNREFERENCED_PARAMETER(timeoutMilliseconds);
     auto p = request->payload();
     int id = p.id();
     if (items_.count(id) > 0) {
@@ -124,9 +126,10 @@ public:
 
   fabricrpc::Status
   BeginDeleteOne(const todolist::DeleteOneRequest *request,
+                 DWORD timeoutMilliseconds,
                  IFabricAsyncOperationCallback *callback,
                  /*out*/ IFabricAsyncOperationContext **context) override {
-
+    UNREFERENCED_PARAMETER(timeoutMilliseconds);
     auto id = request->id();
 
     auto it = items_.find(id);

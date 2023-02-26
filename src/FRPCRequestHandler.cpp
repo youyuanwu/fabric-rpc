@@ -10,6 +10,7 @@
 #include "fabricrpc/exp/AsyncAnyContext.hpp"
 
 #include <cassert>
+#include <chrono>
 #include <memory>
 #include <mutex>
 #include <vector>
@@ -135,9 +136,12 @@ HRESULT STDMETHODCALLTYPE FRPCRequestHandler::BeginProcessRequest(
     /* [in] */ IFabricAsyncOperationCallback *callback,
     /* [retval][out] */ IFabricAsyncOperationContext **context) {
   UNREFERENCED_PARAMETER(clientId);
-  UNREFERENCED_PARAMETER(timeoutMilliseconds);
 
   assert(svc_ != nullptr); // must initialize
+
+  // calculate time spent parsing headers, and substract from timeout passed to
+  // user handlers.
+  auto starttime = std::chrono::steady_clock::now();
 
   // copy the message to fabric rpc implementation
   CComPtr<CComObjectNoLock<FRPCTransportMessage>> msgPtr(
@@ -177,8 +181,18 @@ HRESULT STDMETHODCALLTYPE FRPCRequestHandler::BeginProcessRequest(
       if (!err) {
         assert(endOp != nullptr);
         retCtx->GetContent()->endOp = std::move(endOp);
+
+        // prepare timeout value
+        auto endtime = std::chrono::steady_clock::now();
+        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                      endtime - starttime)
+                      .count();
+        DWORD newTimeout = {};
+        if (timeoutMilliseconds > ms) {
+          newTimeout = timeoutMilliseconds - static_cast<DWORD>(ms);
+        }
         //  invoke begin op
-        err = beginOp->Invoke(body, frpcCallback, &ctx);
+        err = beginOp->Invoke(body, newTimeout, frpcCallback, &ctx);
         if (!err) {
           retCtx->GetContent()->SetInnerCtx(ctx);
           // return a ctx and done.

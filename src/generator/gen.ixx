@@ -214,7 +214,7 @@ public:
     if(no_streaming){
       p.AddLn(vars,
           "virtual fabricrpc::Status Begin$Method$("
-          "const $Request$* request, "
+          "const $Request$* request, DWORD timeoutMilliseconds,"
           "IFabricAsyncOperationCallback *callback, /*out*/ IFabricAsyncOperationContext **context) = 0;");
       p.AddLn(vars,
           "virtual fabricrpc::Status End$Method$("
@@ -244,7 +244,7 @@ public:
       p.Indent();
       p.Add(vars,
         "auto bo = std::bind(&Service::Begin$Method$, this, std::placeholders::_1,\n"
-        "              std::placeholders::_2, std::placeholders::_3);\n"
+        "              std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);\n"
         "auto eo = std::bind(&Service::End$Method$, this, std::placeholders::_1,\n"
         "              std::placeholders::_2);\n"
         "beginOp = std::make_unique<fabricrpc::BeginOperation<$Request$>>(bo);\n"
@@ -345,6 +345,7 @@ public:
       p.AddLn(vars,
           "fabricrpc::Status Begin$Method$("
           "const $Request$* request, "
+          "DWORD timeoutMilliseconds, "
           "IFabricAsyncOperationCallback *callback, /*out*/ IFabricAsyncOperationContext **context);");
       p.AddLn(vars,
           "fabricrpc::Status End$Method$("
@@ -422,8 +423,9 @@ public:
         p.AddLn(vars,
             "fabricrpc::Status $Service$Client::Begin$Method$("
             "const $Request$* request, "
+            "DWORD timeoutMilliseconds, "
             "IFabricAsyncOperationCallback *callback, /*out*/ IFabricAsyncOperationContext **context){\n"
-            "  return fabricrpc::ExecClientBegin(client_, cv_, \"/$Package$$Service$/$Method$\", request,\n"
+            "  return fabricrpc::ExecClientBegin(client_, cv_, timeoutMilliseconds, \"/$Package$$Service$/$Method$\", request,\n"
             "             callback, context);"
             "}\n"
         );

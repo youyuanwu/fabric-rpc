@@ -116,9 +116,8 @@ BOOST_AUTO_TEST_CASE(test_1) {
     BOOST_REQUIRE(ok);
     BOOST_CHECK_EQUAL(h_reply.status_code(),
                       fabricrpc::StatusCode::INVALID_ARGUMENT);
-    BOOST_CHECK_EQUAL(h_reply.status_message(),
-                      "fabric rpc header is empty");
-    BOOST_CHECK_EQUAL(body.size(), 0);    
+    BOOST_CHECK_EQUAL(h_reply.status_message(), "fabric rpc header is empty");
+    BOOST_CHECK_EQUAL(body.size(), 0);
   }
 
   // Send some bad header to server

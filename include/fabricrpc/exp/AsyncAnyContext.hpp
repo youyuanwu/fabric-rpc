@@ -13,7 +13,7 @@
 namespace fabricrpc {
 
 // template any context using atl
-// it is synchronous
+// User needs to invoke callback.
 template <typename T>
 class AsyncAnyCtx : public CComObjectRootEx<CComMultiThreadModel>,
                     public IFabricAsyncOperationContext {
@@ -28,8 +28,7 @@ public:
     callback->AddRef();
     callback_.Attach(callback);
 
-    // invoke callback
-    callback->Invoke(this);
+    // callback is not invoked.
   }
 
   // takes ownership

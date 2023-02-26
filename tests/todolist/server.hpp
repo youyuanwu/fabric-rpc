@@ -57,6 +57,7 @@ public:
         new CComObjectNoLock<fabricrpc::AsyncAnyCtx<std::string>>());
     ctxPtr->SetContent("dummyStr");
     ctxPtr->Initialize(callback);
+    callback->Invoke(ctxPtr);
 
     *context = ctxPtr.Detach();
     return fabricrpc::Status();
@@ -100,6 +101,7 @@ public:
                fabricrpc::AsyncAnyCtx<std::shared_ptr<todoItem>>>());
     ctxPtr->SetContent(std::move(item));
     ctxPtr->Initialize(callback);
+    callback->Invoke(ctxPtr);
 
     *context = ctxPtr.Detach();
     return fabricrpc::Status();
@@ -141,6 +143,7 @@ public:
                fabricrpc::AsyncAnyCtx<std::shared_ptr<todoItem>>>());
     ctxPtr->SetContent(std::move(item));
     ctxPtr->Initialize(callback);
+    callback->Invoke(ctxPtr);
 
     *context = ctxPtr.Detach();
     return fabricrpc::Status();

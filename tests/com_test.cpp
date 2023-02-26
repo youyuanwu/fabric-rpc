@@ -4,7 +4,6 @@
 // license information.
 // ------------------------------------------------------------
 
-#define BOOST_TEST_MODULE com_test
 #include <boost/test/unit_test.hpp>
 
 #include <FabricCommon.h>

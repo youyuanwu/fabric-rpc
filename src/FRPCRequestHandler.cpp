@@ -198,6 +198,7 @@ HRESULT STDMETHODCALLTYPE FRPCRequestHandler::BeginProcessRequest(
   CComPtr<CComObjectNoLock<fabricrpc::AsyncAnyCtx<bool>>> dummyCtx(
       new CComObjectNoLock<fabricrpc::AsyncAnyCtx<bool>>());
   dummyCtx->Initialize(frpcCallback);
+  frpcCallback->Invoke(dummyCtx);
 
   *context = retCtx.Detach();
   return S_OK;

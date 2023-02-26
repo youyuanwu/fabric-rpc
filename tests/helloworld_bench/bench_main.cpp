@@ -28,6 +28,7 @@ public:
         new CComObjectNoLock<fabricrpc::AsyncAnyCtx<std::string>>());
     ctxPtr->SetContent(std::move(msg));
     ctxPtr->Initialize(callback);
+    callback->Invoke(ctxPtr);
 
     *context = ctxPtr.Detach();
     return fabricrpc::Status();

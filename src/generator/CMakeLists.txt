@@ -5,7 +5,7 @@ find_package(Boost REQUIRED) # need boost algo
 
 set(WIN_SOURCES
  main.cpp
- gen.ixx
+ gen.hpp
 )
 
 set(_exe_name fabric_rpc_cpp_plugin)

@@ -29,7 +29,7 @@
 #include <string>
 #include <thread>
 
-import helloworld.tools;
+#include "helloworld_server.hpp"
 
 namespace sf = servicefabric;
 

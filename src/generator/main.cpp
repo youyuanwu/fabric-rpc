@@ -50,7 +50,7 @@
 
 #include <iostream>
 
-import gen;
+#include "gen.hpp"
 
 namespace pb = google::protobuf;
 namespace pbc = pb::compiler;

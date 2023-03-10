@@ -3,7 +3,6 @@
 // Licensed under the MIT License (MIT). See License.txt in the repo root for license information.
 // ------------------------------------------------------------
 
-module;
 #include <google/protobuf/stubs/logging.h>
 #include <google/protobuf/stubs/common.h>
 #include <google/protobuf/compiler/plugin.pb.h>
@@ -18,8 +17,6 @@ module;
 
 #include <vector>
 #include <fstream>
-
-export module gen;
 
 namespace pb = google::protobuf;
 
@@ -473,7 +470,7 @@ private:
   const pb::FileDescriptor* file_;
 };
 
-export class CodeGenerator{
+class CodeGenerator{
 public:
   bool GenerateAll(std::vector<const pb::FileDescriptor*> parsed_files
                                       , std::string & error) const {

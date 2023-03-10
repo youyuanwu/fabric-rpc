@@ -4,7 +4,6 @@
 // license information.
 // ------------------------------------------------------------
 
-module;
 #include "FabricCommon.h"
 
 #ifdef SF_MANUAL
@@ -16,8 +15,6 @@ module;
 #include "helloworld.pb.h"
 #include <any>
 #include <moderncom/interfaces.h>
-
-export module helloworld.tools;
 
 // this hosts tools to support helloworld impl.
 // may eventually be migrated to service-fabric-cpp repo
@@ -56,7 +53,7 @@ private:
   std::any a_;
 };
 
-export class Service_Impl : public helloworld::FabricHello::Service {
+class Service_Impl : public helloworld::FabricHello::Service {
 public:
   fabricrpc::Status
   BeginSayHello(const ::helloworld::FabricRequest *request,

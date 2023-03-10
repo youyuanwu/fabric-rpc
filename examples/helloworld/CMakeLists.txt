@@ -27,7 +27,6 @@ protobuf_generate(LANGUAGE grpc
 # common lib
 set(_hello_lib lib_helloworld)
 add_library(${_hello_lib} 
-  helloworld-tools.ixx
 #  helloworld.gen.cpp
 #  helloworld.gen.h
 ${PROTO_SRCS} ${PROTO_HDRS}
@@ -53,7 +52,7 @@ target_link_libraries(${_hello_lib}
 
 # server
 set(_server_exe hello_server)
-add_executable(${_server_exe} main.cpp)
+add_executable(${_server_exe} main.cpp helloworld_server.hpp)
 target_link_libraries(${_server_exe} PRIVATE ${_hello_lib})
 
 # client

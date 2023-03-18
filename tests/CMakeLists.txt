@@ -13,7 +13,7 @@ add_executable(fabric_rpc_base_test
 )
 target_link_libraries(fabric_rpc_base_test
   PUBLIC Boost::unit_test_framework Boost::disable_autolinking
-  fabric_headers
+  fabric_internal_sdk
   fabric_rpc
   fabric_rpc_proto
   lib_helloworld

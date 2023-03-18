@@ -28,8 +28,7 @@ ${FABRIC_RPC_SRCS}
 target_link_libraries(todolist_test PUBLIC
     fabric_rpc_proto
     fabric_rpc
-    fabric_internal_headers
-    fabric_internal_uuids
+    fabric_internal_sdk
     FabricTransport
     fabric_rpc_tool
     Boost::unit_test_framework Boost::disable_autolinking

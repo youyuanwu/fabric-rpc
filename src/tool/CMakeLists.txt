@@ -14,6 +14,6 @@ target_include_directories(fabric_rpc_tool PUBLIC
 )
 
 target_link_libraries(fabric_rpc_tool PUBLIC
-  fabric_internal_headers
+  fabric_internal_sdk
 )
 

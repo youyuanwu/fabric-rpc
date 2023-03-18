@@ -41,8 +41,7 @@ target_include_directories(${_hello_lib} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(${_hello_lib} 
   PUBLIC fabric_rpc_proto
     fabric_rpc
-    fabric_internal_headers
-    fabric_internal_uuids
+    fabric_internal_sdk
     FabricTransport
 )
 

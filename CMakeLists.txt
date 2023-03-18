@@ -21,20 +21,20 @@ if(NOT protobuf_POPULATED)
   add_subdirectory(${protobuf_SOURCE_DIR} ${protobuf_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
-message(STATUS "fetching service-fabric-cpp")
+message(STATUS "fetching fabric_metadata")
 
 include(FetchContent)
-FetchContent_Declare(service_fabric_cpp
-    GIT_REPOSITORY https://github.com/youyuanwu/service-fabric-cpp.git
-    GIT_TAG a9e8a3f744225ebeb8b58c523ed3e99db2e876b6
+FetchContent_Declare(fabric_metadata
+    GIT_REPOSITORY https://github.com/youyuanwu/fabric-metadata.git
+    GIT_TAG d9818619b922b947124b33f7fe80ebca996be4db
 )
-FetchContent_GetProperties(service_fabric_cpp)
-if(NOT service_fabric_cpp_POPULATED)
-    FetchContent_Populate(service_fabric_cpp)
-    add_subdirectory(${service_fabric_cpp_SOURCE_DIR} ${service_fabric_cpp_BINARY_DIR} EXCLUDE_FROM_ALL)
+FetchContent_GetProperties(fabric_metadata)
+if(NOT fabric_metadata_POPULATED)
+    FetchContent_Populate(fabric_metadata)
+    add_subdirectory(${fabric_metadata_SOURCE_DIR} ${fabric_metadata_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
-include(${service_fabric_cpp_SOURCE_DIR}/cmake/clang-format.cmake)
+include(${fabric_metadata_SOURCE_DIR}/cmake/clang-format.cmake)
 
 add_subdirectory(src)
 

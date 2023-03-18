@@ -68,7 +68,7 @@ if(OpenCppCoverage_exe)
     file(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}" PWD_WIN_PATH)
     add_custom_target(coverage
         COMMAND ${OpenCppCoverage_exe} --quiet --export_type cobertura:cobertura.xml --cover_children 
-        --sources "${PWD_WIN_PATH}\\src" --sources "${PWD_WIN_PATH}\\include" --modules "${PWD_WIN_PATH}"
+        --sources "${PWD_WIN_PATH}\\src\\fabric_rpc" --modules "${PWD_WIN_PATH}"
         -- ctest -C Debug --test-dir build --repeat until-pass:3 --timeout 30
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     )

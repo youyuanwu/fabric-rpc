@@ -6,16 +6,10 @@
 
 #include "fabrictransport_.h"
 
-#include <moderncom/interfaces.h>
-
-#include "servicefabric/async_context.hpp"
-#include "servicefabric/fabric_error.hpp"
-#include "servicefabric/transport_dummy_client_conn_handler.hpp"
-#include "servicefabric/transport_dummy_client_notification_handler.hpp"
-#include "servicefabric/transport_dummy_msg_disposer.hpp"
-#include "servicefabric/transport_dummy_server_conn_handler.hpp"
-#include "servicefabric/transport_message.hpp"
-#include "servicefabric/waitable_callback.hpp"
+#include "fabricrpc_tool/msg_disposer.hpp"
+#include "fabricrpc_tool/tool_server_connection_handler.hpp"
+#include "fabricrpc_tool/waitable_callback.hpp"
+#include "winrt/base.h"
 
 #ifdef SF_MANUAL
 #include "helloworld.gen.h"
@@ -23,15 +17,12 @@
 #include "helloworld.fabricrpc.h"
 #endif
 
-#include <any>
 #include <chrono>
 #include <iostream>
 #include <string>
 #include <thread>
 
 #include "helloworld_server.hpp"
-
-namespace sf = servicefabric;
 
 int main() {
 
@@ -54,14 +45,14 @@ int main() {
   std::shared_ptr<fabricrpc::MiddleWare> hello_svc =
       std::make_shared<Service_Impl>();
 
-  belt::com::com_ptr<IFabricTransportMessageHandler> req_handler;
+  winrt::com_ptr<IFabricTransportMessageHandler> req_handler;
   helloworld::CreateFabricRPCRequestHandler({hello_svc}, req_handler.put());
 
-  belt::com::com_ptr<IFabricTransportConnectionHandler> conn_handler =
-      sf::transport_dummy_server_conn_handler::create_instance().to_ptr();
-  belt::com::com_ptr<IFabricTransportMessageDisposer> msg_disposer =
-      sf::transport_dummy_msg_disposer::create_instance().to_ptr();
-  belt::com::com_ptr<IFabricTransportListener> listener;
+  winrt::com_ptr<IFabricTransportConnectionHandler> conn_handler =
+      winrt::make<fabricrpc::server_tool_connection_handler>();
+  winrt::com_ptr<IFabricTransportMessageDisposer> msg_disposer =
+      winrt::make<fabricrpc::msg_disposer>();
+  winrt::com_ptr<IFabricTransportListener> listener;
 
   // create listener
   HRESULT hr = CreateFabricTransportListener(
@@ -72,11 +63,11 @@ int main() {
     return EXIT_FAILURE;
   }
   // open listener
-  belt::com::com_ptr<IFabricStringResult> addr_str;
+  winrt::com_ptr<IFabricStringResult> addr_str;
   {
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<fabricrpc::IWaitableCallback> callback =
+        winrt::make<fabricrpc::waitable_callback>();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     hr = listener->BeginOpen(callback.get(), ctx.put());
     if (hr != S_OK) {
       return EXIT_FAILURE;
@@ -94,9 +85,9 @@ int main() {
 
   // close listener
   {
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<fabricrpc::IWaitableCallback> callback =
+        winrt::make<fabricrpc::waitable_callback>();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     hr = listener->BeginClose(callback.get(), ctx.put());
     if (hr != S_OK) {
       return EXIT_FAILURE;

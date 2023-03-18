@@ -31,10 +31,7 @@ target_link_libraries(todolist_test PUBLIC
     fabric_internal_headers
     fabric_internal_uuids
     FabricTransport
-    fabric_error
-    fabric_ext
-    fabric_internal_ext
-    #libprotobuf
+    fabric_rpc_tool
     Boost::unit_test_framework Boost::disable_autolinking
 )
 

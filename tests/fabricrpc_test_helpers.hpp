@@ -9,25 +9,23 @@
 #include <atlbase.h>
 #include <atlcom.h>
 
-#include "servicefabric/async_context.hpp"
-#include "servicefabric/fabric_error.hpp"
-#include "servicefabric/transport_dummy_client_conn_handler.hpp"
-#include "servicefabric/transport_dummy_client_notification_handler.hpp"
-#include "servicefabric/transport_dummy_msg_disposer.hpp"
-#include "servicefabric/transport_dummy_server_conn_handler.hpp"
-#include "servicefabric/transport_message.hpp"
-#include "servicefabric/waitable_callback.hpp"
+#include "fabricrpc_tool/sync_async_context.hpp"
+#include "fabricrpc_tool/waitable_callback.hpp"
+
+#include "fabricrpc_tool/msg_disposer.hpp"
+#include "fabricrpc_tool/tool_client_connection_handler.hpp"
+#include "fabricrpc_tool/tool_client_notification_handler.hpp"
+
+#include "fabricrpc_tool/tool_server_connection_handler.hpp"
 
 // common functions
 
 // open a server and client
 
-namespace sf = servicefabric;
-
 class myserver {
 public:
   HRESULT
-  StartServer(belt::com::com_ptr<IFabricTransportMessageHandler> req_handler) {
+  StartServer(IFabricTransportMessageHandler *req_handler) {
     if (listener_) {
       return ERROR_ALREADY_EXISTS;
     }
@@ -48,26 +46,26 @@ public:
     addr.Path = L"/";
     addr.Port = 0; // os will pick an random port.
 
-    belt::com::com_ptr<IFabricTransportConnectionHandler> conn_handler =
-        sf::transport_dummy_server_conn_handler::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricTransportMessageDisposer> msg_disposer =
-        sf::transport_dummy_msg_disposer::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricTransportListener> listener;
+    winrt::com_ptr<IFabricTransportConnectionHandler> conn_handler =
+        winrt::make<fabricrpc::server_tool_connection_handler>();
+    winrt::com_ptr<IFabricTransportMessageDisposer> msg_disposer =
+        winrt::make<fabricrpc::msg_disposer>();
+    winrt::com_ptr<IFabricTransportListener> listener;
 
     // create listener
     HRESULT hr = CreateFabricTransportListener(
-        IID_IFabricTransportListener, &settings, &addr, req_handler.get(),
+        IID_IFabricTransportListener, &settings, &addr, req_handler,
         conn_handler.get(), msg_disposer.get(), listener.put());
 
     if (hr != S_OK) {
       return hr;
     }
     // open listener
-    belt::com::com_ptr<IFabricStringResult> addr_str;
+    winrt::com_ptr<IFabricStringResult> addr_str;
     {
-      belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-          sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-      belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+      winrt::com_ptr<fabricrpc::IWaitableCallback> callback =
+          winrt::make<fabricrpc::waitable_callback>();
+      winrt::com_ptr<IFabricAsyncOperationContext> ctx;
       hr = listener->BeginOpen(callback.get(), ctx.put());
       if (hr != S_OK) {
         return hr;
@@ -93,9 +91,9 @@ public:
     // cannot call this here otherwise not able to close.
     // listener_->Abort();
 
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<fabricrpc::IWaitableCallback> callback =
+        winrt::make<fabricrpc::waitable_callback>();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     HRESULT hr = listener_->BeginClose(callback.get(), ctx.put());
     if (hr != S_OK) {
       return hr;
@@ -134,17 +132,16 @@ public:
     settings.SecurityCredentials = &cred;
 
     // This can mem leak if fabric transport request call fails.
-    belt::com::com_ptr<IFabricTransportCallbackMessageHandler> client_notify_h =
-        sf::transport_dummy_client_notification_handler::create_instance()
-            .to_ptr();
+    winrt::com_ptr<IFabricTransportCallbackMessageHandler> client_notify_h =
+        winrt::make<fabricrpc::tool_client_notification_handler>();
     // This can mem leak if fabric transport request call fails.
-    belt::com::com_ptr<IFabricTransportClientEventHandler> client_event_h =
-        sf::transport_dummy_client_conn_handler::create_instance().to_ptr();
+    winrt::com_ptr<IFabricTransportClientEventHandler> client_event_h =
+        winrt::make<fabricrpc::tool_client_connection_handler>();
     // mem leak here. allo block 7929 in cmd or 7934 in debugger.
-    belt::com::com_ptr<IFabricTransportMessageDisposer> client_msg_disposer =
-        sf::transport_dummy_msg_disposer::create_instance().to_ptr();
-    ;
-    belt::com::com_ptr<IFabricTransportClient> client;
+    winrt::com_ptr<IFabricTransportMessageDisposer> client_msg_disposer =
+        winrt::make<fabricrpc::msg_disposer>();
+
+    winrt::com_ptr<IFabricTransportClient> client;
 
     // open client
     hr = CreateFabricTransportClient(
@@ -162,9 +159,9 @@ public:
 
     // open client
     {
-      belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-          sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-      belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+      winrt::com_ptr<fabricrpc::IWaitableCallback> callback =
+          winrt::make<fabricrpc::waitable_callback>();
+      winrt::com_ptr<IFabricAsyncOperationContext> ctx;
       hr = client->BeginOpen(1000, callback.get(), ctx.put());
       if (hr != S_OK) {
         // BOOST_LOG_TRIVIAL(debug) << "cannot begin open " << hr;
@@ -191,9 +188,9 @@ public:
 
     client_->Abort();
 
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<fabricrpc::IWaitableCallback> callback =
+        winrt::make<fabricrpc::waitable_callback>();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     HRESULT hr = client_->BeginClose(1000, callback.get(), ctx.put());
     if (hr != S_OK) {
       // BOOST_LOG_TRIVIAL(debug) << "cannot begin open " << hr;

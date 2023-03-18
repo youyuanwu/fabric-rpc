@@ -32,3 +32,6 @@ target_link_libraries(fabric_rpc PUBLIC
   fabric_internal_headers)
 
 add_subdirectory(generator)
+
+# fabric-rpc-tool lib used for testing and not intended to be used/shipped outside this repo.
+add_subdirectory(tool)

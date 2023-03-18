@@ -6,23 +6,15 @@
 
 #pragma once
 
-#include "servicefabric/async_context.hpp"
-#include "servicefabric/fabric_error.hpp"
-#include "servicefabric/transport_dummy_client_conn_handler.hpp"
-#include "servicefabric/transport_dummy_client_notification_handler.hpp"
-#include "servicefabric/transport_dummy_msg_disposer.hpp"
-#include "servicefabric/transport_dummy_server_conn_handler.hpp"
-#include "servicefabric/transport_message.hpp"
-#include "servicefabric/waitable_callback.hpp"
 #include "todolist.fabricrpc.h"
 
-namespace sf = servicefabric;
+#include <fabricrpc_tool/waitable_callback.hpp>
+#include <winrt/base.h>
 
 fabricrpc::Status AddItem(todolist::TodoClient &c, int id) {
-  belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-      sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-  belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
-
+  winrt::com_ptr<fabricrpc::IWaitableCallback> callback =
+      winrt::make<fabricrpc::waitable_callback>();
+  winrt::com_ptr<IFabricAsyncOperationContext> ctx;
   std::string desc = "myitem" + std::to_string(id);
 
   todolist::AddOneRequest req;
@@ -48,9 +40,9 @@ fabricrpc::Status AddItem(todolist::TodoClient &c, int id) {
 }
 
 fabricrpc::Status FindAll(todolist::TodoClient &c, int count) {
-  belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-      sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-  belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+  winrt::com_ptr<fabricrpc::IWaitableCallback> callback =
+      winrt::make<fabricrpc::waitable_callback>();
+  winrt::com_ptr<IFabricAsyncOperationContext> ctx;
 
   todolist::FindRequest req;
   fabricrpc::Status ec = c.BeginFind(&req, 1000, callback.get(), ctx.put());
@@ -68,9 +60,9 @@ fabricrpc::Status FindAll(todolist::TodoClient &c, int count) {
 }
 
 fabricrpc::Status DeleteOne(todolist::TodoClient &c, int id) {
-  belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-      sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-  belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+  winrt::com_ptr<fabricrpc::IWaitableCallback> callback =
+      winrt::make<fabricrpc::waitable_callback>();
+  winrt::com_ptr<IFabricAsyncOperationContext> ctx;
   todolist::DeleteOneRequest req;
   req.set_id(id);
   fabricrpc::Status ec =

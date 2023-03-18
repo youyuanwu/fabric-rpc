@@ -10,9 +10,8 @@
 #include "fabricrpc/exp/AsyncAnyContext.hpp"
 #include "helloworld.fabricrpc.h"
 
+#include "asio_waitable_callback.hpp"
 #include "fabricrpc_test_helpers.hpp"
-
-#include "servicefabric/asio_callback.hpp"
 
 #include <boost/program_options.hpp>
 
@@ -95,7 +94,6 @@ BOOST_TEST_GLOBAL_FIXTURE(MyGlobalFixture);
 
 BOOST_AUTO_TEST_SUITE(bench_suite)
 
-namespace sf = servicefabric;
 namespace net = boost::asio;
 
 // concurrency determines how many requests to launch from one client at a time
@@ -116,10 +114,10 @@ void start_one_client(std::atomic<int> &successcount,
 
   // single thread, no lock needed.
   std::map<IFabricAsyncOperationCallback *,
-           belt::com::com_ptr<IFabricAsyncOperationCallback>>
+           winrt::com_ptr<IFabricAsyncOperationCallback>>
       callbacks;
   std::map<IFabricAsyncOperationContext *,
-           belt::com::com_ptr<IFabricAsyncOperationContext>>
+           winrt::com_ptr<IFabricAsyncOperationContext>>
       ctxs;
   std::map<IFabricAsyncOperationContext *, IFabricAsyncOperationCallback *>
       ctx2callback;
@@ -149,8 +147,8 @@ void start_one_client(std::atomic<int> &successcount,
     // inside the ctx.
     assert(ctx2callback.contains(ctx));
     IFabricAsyncOperationCallback *callbackPtr = ctx2callback.at(ctx);
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctxtemp = ctxs.at(ctx);
-    belt::com::com_ptr<IFabricAsyncOperationCallback> callbacktemp =
+    winrt::com_ptr<IFabricAsyncOperationContext> ctxtemp = ctxs.at(ctx);
+    winrt::com_ptr<IFabricAsyncOperationCallback> callbacktemp =
         callbacks.at(callbackPtr);
     assert(1 == ctx2callback.erase(ctx));
     assert(1 == ctxs.erase(ctxtemp.get()));
@@ -160,19 +158,20 @@ void start_one_client(std::atomic<int> &successcount,
   startfunc = [&]() {
     // callback needs to be persisted until operation ends.
     // ctx too
-    belt::com::com_ptr<IFabricAsyncOperationCallback> callback =
-        sf::AsioCallback::create_instance(lamda_callback,
-                                          io_context.get_executor())
-            .to_ptr();
+    // This should be the only place where belt::com is used now.
+    winrt::com_ptr<IFabricAsyncOperationCallback> callback =
+        winrt::make<asio_waitable_callback>(lamda_callback,
+                                            io_context.get_executor());
     callbacks.emplace(callback.get(), callback);
 
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     helloworld::FabricRequest req;
     req.set_fabricname("myname");
     hr = hc.BeginSayHello(&req, 1000, callback.get(), ctx.put());
     if (hr != S_OK) {
-      BOOST_TEST_MESSAGE("BeginSayHello Error: " +
-                         sf::get_fabric_error_str(hr));
+      // BOOST_TEST_MESSAGE("BeginSayHello Error: " +
+      //                    sf::get_fabric_error_str(hr));
+      BOOST_TEST_MESSAGE("BeginSayHello Error: " + std::to_string(hr));
     }
     assert(hr == S_OK);
     ctxs.emplace(ctx.get(), ctx);
@@ -192,7 +191,7 @@ BOOST_AUTO_TEST_CASE(test_1) {
 
   std::shared_ptr<fabricrpc::MiddleWare> svc = std::make_shared<Service_Impl>();
 
-  belt::com::details::com_ptr<IFabricTransportMessageHandler> handler;
+  winrt::com_ptr<IFabricTransportMessageHandler> handler;
   helloworld::CreateFabricRPCRequestHandler({svc}, handler.put());
 
   HRESULT hr = S_OK;
@@ -201,7 +200,7 @@ BOOST_AUTO_TEST_CASE(test_1) {
   std::atomic<int> successcount = 0;
 
   myserver s;
-  hr = s.StartServer(handler);
+  hr = s.StartServer(handler.get());
   BOOST_REQUIRE_EQUAL(hr, S_OK);
 
   // open all clients

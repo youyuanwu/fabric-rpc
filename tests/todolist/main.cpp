@@ -7,17 +7,14 @@
 #define BOOST_TEST_MODULE todolist_test
 #include <boost/test/unit_test.hpp>
 
-// #include <FabricCommon.h>
-// #include <atlbase.h>
-// #include <atlcom.h>
-
 #include "client.hpp"
 #include "fabricrpc.pb.h"
 #include "server.hpp"
-#include "servicefabric/fabric_error.hpp"
+// #include "servicefabric/fabric_error.hpp"
 #include "todolist.fabricrpc.h"
 
 #include "fabricrpc_test_helpers.hpp"
+#include "fabricrpc_tool/tool_transport_msg.hpp"
 
 // global fixture to tear down protobuf
 // protobuf has internal memories that needs to be freed before exit program
@@ -46,11 +43,11 @@ BOOST_AUTO_TEST_CASE(test_1) {
   std::shared_ptr<fabricrpc::MiddleWare> todo_svc =
       std::make_shared<TodoList_Impl>();
 
-  belt::com::com_ptr<IFabricTransportMessageHandler> req_handler;
+  winrt::com_ptr<IFabricTransportMessageHandler> req_handler;
   todolist::CreateFabricRPCRequestHandler({todo_svc}, req_handler.put());
 
   myserver s;
-  HRESULT hr = s.StartServer(req_handler);
+  HRESULT hr = s.StartServer(req_handler.get());
   BOOST_REQUIRE_EQUAL(hr, S_OK);
 
   myclient c;
@@ -96,21 +93,21 @@ BOOST_AUTO_TEST_CASE(test_1) {
 
   // Send empty header to server
   {
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
-    belt::com::com_ptr<IFabricTransportMessage> msg =
-        sf::transport_message::create_instance("mybody", "").to_ptr();
+    winrt::com_ptr<fabricrpc::IWaitableCallback> callback =
+        winrt::make<fabricrpc::waitable_callback>();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<IFabricTransportMessage> msg =
+        winrt::make<fabricrpc::tool_transport_msg>("mybody", "");
     hr =
         c.GetClient()->BeginRequest(msg.get(), 1000, callback.get(), ctx.put());
     BOOST_REQUIRE_EQUAL(hr, S_OK);
     callback->Wait();
-    belt::com::com_ptr<IFabricTransportMessage> reply;
+    winrt::com_ptr<IFabricTransportMessage> reply;
     hr = c.GetClient()->EndRequest(ctx.get(), reply.put());
     BOOST_REQUIRE_EQUAL(hr, S_OK);
 
-    std::string body = sf::get_body(reply.get());
-    std::string headers = sf::get_header(reply.get());
+    std::string body = fabricrpc::get_body(reply.get());
+    std::string headers = fabricrpc::get_header(reply.get());
     fabricrpc::reply_header h_reply;
     bool ok = h_reply.ParseFromString(headers);
     BOOST_REQUIRE(ok);
@@ -123,21 +120,21 @@ BOOST_AUTO_TEST_CASE(test_1) {
   // Send some bad header to server
   // server should reply with payload with detailed error info
   {
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
-    belt::com::com_ptr<IFabricTransportMessage> msg =
-        sf::transport_message::create_instance("mybody", "myheader").to_ptr();
+    winrt::com_ptr<fabricrpc::IWaitableCallback> callback =
+        winrt::make<fabricrpc::waitable_callback>();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<IFabricTransportMessage> msg =
+        winrt::make<fabricrpc::tool_transport_msg>("mybody", "myheader");
     hr =
         c.GetClient()->BeginRequest(msg.get(), 1000, callback.get(), ctx.put());
     BOOST_REQUIRE_EQUAL(hr, S_OK);
     callback->Wait();
-    belt::com::com_ptr<IFabricTransportMessage> reply;
+    winrt::com_ptr<IFabricTransportMessage> reply;
     hr = c.GetClient()->EndRequest(ctx.get(), reply.put());
     BOOST_REQUIRE_EQUAL(hr, S_OK);
 
-    std::string body = sf::get_body(reply.get());
-    std::string headers = sf::get_header(reply.get());
+    std::string body = fabricrpc::get_body(reply.get());
+    std::string headers = fabricrpc::get_header(reply.get());
     fabricrpc::reply_header h_reply;
     bool ok = h_reply.ParseFromString(headers);
     BOOST_REQUIRE(ok);
@@ -154,7 +151,7 @@ BOOST_AUTO_TEST_CASE(test_1) {
 
   // close server
   hr = s.CloseServer();
-  BOOST_TEST_MESSAGE("error:" + sf::get_fabric_error_str(hr));
+  // BOOST_TEST_MESSAGE("error:" + sf::get_fabric_error_str(hr));
   BOOST_REQUIRE_EQUAL(hr, S_OK);
 
   // sleep does not help with mem leak cleanups.
@@ -177,7 +174,7 @@ public:
   // impl
   void STDMETHODCALLTYPE Invoke(
       /* [in] */ IFabricAsyncOperationContext *context) override {
-    belt::com::com_ptr<IFabricTransportMessage> reply_msg;
+    winrt::com_ptr<IFabricTransportMessage> reply_msg;
     HRESULT hr = handler_->EndProcessRequest(context, reply_msg.put());
     BOOST_REQUIRE_EQUAL(hr, S_OK);
   }
@@ -190,30 +187,29 @@ BOOST_AUTO_TEST_CASE(test_sync_invoke) {
   std::shared_ptr<fabricrpc::MiddleWare> todo_svc =
       std::make_shared<TodoList_Impl>();
 
-  belt::com::com_ptr<IFabricTransportMessageHandler> req_handler;
+  winrt::com_ptr<IFabricTransportMessageHandler> req_handler;
   todolist::CreateFabricRPCRequestHandler({todo_svc}, req_handler.put());
 
   // send a dummy message using wait
   COMMUNICATION_CLIENT_ID id = L"Dummy";
   {
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<fabricrpc::IWaitableCallback> callback =
+        winrt::make<fabricrpc::waitable_callback>();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
 
     fabricrpc::request_header header;
     todolist::FindRequest body;
 
     header.set_url("/todolist.Todo/Find");
 
-    belt::com::com_ptr<IFabricTransportMessage> msg =
-        sf::transport_message::create_instance(body.SerializeAsString(),
-                                               header.SerializeAsString())
-            .to_ptr();
+    winrt::com_ptr<IFabricTransportMessage> msg =
+        winrt::make<fabricrpc::tool_transport_msg>(body.SerializeAsString(),
+                                                   header.SerializeAsString());
     HRESULT hr = req_handler->BeginProcessRequest(id, msg.get(), 1000,
                                                   callback.get(), ctx.put());
     BOOST_REQUIRE_EQUAL(hr, S_OK);
     callback->Wait();
-    belt::com::com_ptr<IFabricTransportMessage> reply_msg;
+    winrt::com_ptr<IFabricTransportMessage> reply_msg;
     hr = req_handler->EndProcessRequest(ctx.get(), reply_msg.put());
     BOOST_REQUIRE_EQUAL(hr, S_OK);
   }
@@ -224,17 +220,16 @@ BOOST_AUTO_TEST_CASE(test_sync_invoke) {
         new CComObjectNoLock<MyTestCallback>());
     callback->Initialize(req_handler.get());
 
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
 
     fabricrpc::request_header header;
     todolist::FindRequest body;
 
     header.set_url("/todolist.Todo/Find");
 
-    belt::com::com_ptr<IFabricTransportMessage> msg =
-        sf::transport_message::create_instance(body.SerializeAsString(),
-                                               header.SerializeAsString())
-            .to_ptr();
+    winrt::com_ptr<IFabricTransportMessage> msg =
+        winrt::make<fabricrpc::tool_transport_msg>(body.SerializeAsString(),
+                                                   header.SerializeAsString());
     HRESULT hr = req_handler->BeginProcessRequest(id, msg.get(), 1000, callback,
                                                   ctx.put());
     BOOST_REQUIRE_EQUAL(hr, S_OK);
@@ -261,18 +256,18 @@ BOOST_AUTO_TEST_CASE(test_sync_invoke) {
 //     settings.OperationTimeoutInSeconds = 30;
 //     settings.SecurityCredentials = &cred;
 
-//     belt::com::com_ptr<IFabricTransportCallbackMessageHandler>
+//     winrt::com_ptr<IFabricTransportCallbackMessageHandler>
 //     client_notify_h =
 //         sf::transport_dummy_client_notification_handler::create_instance()
 //             .to_ptr();
 
-//     belt::com::com_ptr<IFabricTransportClientEventHandler> client_event_h =
+//     winrt::com_ptr<IFabricTransportClientEventHandler> client_event_h =
 //         sf::transport_dummy_client_conn_handler::create_instance().to_ptr();
 //     // This is a bug in transport. the disposer is never freed.
-//     belt::com::com_ptr<IFabricTransportMessageDisposer> client_msg_disposer =
+//     winrt::com_ptr<IFabricTransportMessageDisposer> client_msg_disposer =
 //         sf::transport_dummy_msg_disposer::create_instance().to_ptr();
 
-//     belt::com::com_ptr<IFabricTransportClient> client;
+//     winrt::com_ptr<IFabricTransportClient> client;
 
 //     // open client
 //     hr = CreateFabricTransportClient(

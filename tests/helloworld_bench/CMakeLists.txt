@@ -10,6 +10,7 @@ target_link_libraries(helloworld_bench
   lib_helloworld
   fabric_rpc_proto
   fabric_rpc
+  fabric_rpc_tool
   Boost::unit_test_framework Boost::disable_autolinking
   Boost::program_options
 )
@@ -17,7 +18,12 @@ target_link_libraries(helloworld_bench
 target_include_directories(
   helloworld_bench
   PRIVATE
+  .
   ..
+)
+
+target_compile_definitions(helloworld_bench
+  PUBLIC WIN32_LEAN_AND_MEAN # This is to get rid of include from fabric of winsock.h for asio
 )
 
 add_test(NAME helloworld_bench COMMAND helloworld_bench

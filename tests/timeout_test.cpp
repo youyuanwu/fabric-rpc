@@ -83,11 +83,11 @@ BOOST_AUTO_TEST_CASE(timeout1) {
       std::make_shared<Service_Impl_Timeout>();
   std::shared_ptr<fabricrpc::MiddleWare> hello_svc = hello_svc_raw;
 
-  belt::com::com_ptr<IFabricTransportMessageHandler> req_handler;
+  winrt::com_ptr<IFabricTransportMessageHandler> req_handler;
   helloworld::CreateFabricRPCRequestHandler({hello_svc}, req_handler.put());
 
   myserver s;
-  HRESULT hr = s.StartServer(req_handler);
+  HRESULT hr = s.StartServer(req_handler.get());
   BOOST_REQUIRE_EQUAL(hr, S_OK);
 
   myclient c;
@@ -99,9 +99,9 @@ BOOST_AUTO_TEST_CASE(timeout1) {
 
   // make a normal call
   {
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<fabricrpc::IWaitableCallback> callback =
+        winrt::make<fabricrpc::waitable_callback>();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     helloworld::FabricRequest req;
     req.set_fabricname("fabric");
     fabricrpc::Status beginStatus =
@@ -115,9 +115,9 @@ BOOST_AUTO_TEST_CASE(timeout1) {
 
   // make a timed out call
   {
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<fabricrpc::IWaitableCallback> callback =
+        winrt::make<fabricrpc::waitable_callback>();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     helloworld::FabricRequest req;
     req.set_fabricname("fabric");
     // 0 timeout
@@ -131,9 +131,9 @@ BOOST_AUTO_TEST_CASE(timeout1) {
     BOOST_REQUIRE(endStatus.IsTransportError());
     BOOST_REQUIRE_EQUAL(endStatus.GetErrorCode(),
                         fabricrpc::StatusCode::FABRIC_TRANSPORT_ERROR);
-    BOOST_TEST_MESSAGE(
-        "transport error: " +
-        sf::get_fabric_error_str(endStatus.GetTransportErrorCode()));
+    // BOOST_TEST_MESSAGE(
+    //     "transport error: " +
+    //     sf::get_fabric_error_str(endStatus.GetTransportErrorCode()));
     BOOST_REQUIRE_EQUAL(endStatus.GetTransportErrorCode(),
                         FABRIC_E_CANNOT_CONNECT);
   }
@@ -141,9 +141,9 @@ BOOST_AUTO_TEST_CASE(timeout1) {
   // make a call but the server timed out due to sleep
   hello_svc_raw->SetBeginSleepMs(1000);
   {
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<fabricrpc::IWaitableCallback> callback =
+        winrt::make<fabricrpc::waitable_callback>();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     helloworld::FabricRequest req;
     req.set_fabricname("fabric");
     // 0 timeout
@@ -157,9 +157,9 @@ BOOST_AUTO_TEST_CASE(timeout1) {
     BOOST_REQUIRE(endStatus.IsTransportError());
     BOOST_REQUIRE_EQUAL(endStatus.GetErrorCode(),
                         fabricrpc::StatusCode::FABRIC_TRANSPORT_ERROR);
-    BOOST_TEST_MESSAGE(
-        "transport error: " +
-        sf::get_fabric_error_str(endStatus.GetTransportErrorCode()));
+    // BOOST_TEST_MESSAGE(
+    //     "transport error: " +
+    //     sf::get_fabric_error_str(endStatus.GetTransportErrorCode()));
     BOOST_REQUIRE_EQUAL(endStatus.GetTransportErrorCode(), FABRIC_E_TIMEOUT);
   }
 
@@ -170,9 +170,9 @@ BOOST_AUTO_TEST_CASE(timeout1) {
   hello_svc_raw->SetBeginSleepMs(0);
   hello_svc_raw->SetEndSleepMs(1000);
   {
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<fabricrpc::IWaitableCallback> callback =
+        winrt::make<fabricrpc::waitable_callback>();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
     helloworld::FabricRequest req;
     req.set_fabricname("fabric");
     // 0 timeout
@@ -186,9 +186,9 @@ BOOST_AUTO_TEST_CASE(timeout1) {
     BOOST_REQUIRE(endStatus.IsTransportError());
     BOOST_REQUIRE_EQUAL(endStatus.GetErrorCode(),
                         fabricrpc::StatusCode::FABRIC_TRANSPORT_ERROR);
-    BOOST_TEST_MESSAGE(
-        "transport error: " +
-        sf::get_fabric_error_str(endStatus.GetTransportErrorCode()));
+    // BOOST_TEST_MESSAGE(
+    //     "transport error: " +
+    //     sf::get_fabric_error_str(endStatus.GetTransportErrorCode()));
     BOOST_REQUIRE_EQUAL(endStatus.GetTransportErrorCode(), FABRIC_E_TIMEOUT);
   }
 
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(timeout1) {
 
   // close server
   hr = s.CloseServer();
-  BOOST_TEST_MESSAGE("error:" + sf::get_fabric_error_str(hr));
+  // BOOST_TEST_MESSAGE("error:" + sf::get_fabric_error_str(hr));
   BOOST_REQUIRE_EQUAL(hr, S_OK);
 }
 

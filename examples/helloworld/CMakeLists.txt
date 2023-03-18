@@ -44,21 +44,17 @@ target_link_libraries(${_hello_lib}
     fabric_internal_headers
     fabric_internal_uuids
     FabricTransport
-    fabric_error
-    fabric_ext
-    fabric_internal_ext
-    Boost::log Boost::disable_autolinking Boost::headers
 )
 
 # server
 set(_server_exe hello_server)
 add_executable(${_server_exe} main.cpp helloworld_server.hpp)
-target_link_libraries(${_server_exe} PRIVATE ${_hello_lib})
+target_link_libraries(${_server_exe} PRIVATE ${_hello_lib} fabric_rpc_tool)
 
 # client
 set(_client_exe hello_client)
 add_executable(${_client_exe} client.cpp)
-target_link_libraries(${_client_exe} PRIVATE ${_hello_lib})
+target_link_libraries(${_client_exe} PRIVATE ${_hello_lib} fabric_rpc_tool)
 
 # target to replace generated code.
 add_custom_target(hello_world_replace_manual_code

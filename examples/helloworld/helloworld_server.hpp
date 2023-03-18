@@ -5,6 +5,7 @@
 // ------------------------------------------------------------
 
 #include "FabricCommon.h"
+#include <winrt/base.h>
 
 #ifdef SF_MANUAL
 #include "helloworld.gen.h"
@@ -14,7 +15,6 @@
 
 #include "helloworld.pb.h"
 #include <any>
-#include <moderncom/interfaces.h>
 
 // this hosts tools to support helloworld impl.
 // may eventually be migrated to service-fabric-cpp repo
@@ -23,11 +23,12 @@
 // std::any is owned by this ctx.
 // User needs to invoke the callback.
 class async_any_context
-    : public belt::com::object<async_any_context,
+    : public winrt::implements<async_any_context,
                                IFabricAsyncOperationContext> {
 public:
   async_any_context(IFabricAsyncOperationCallback *callback, std::any &&a)
-      : callback_(callback), a_(std::move(a)) {
+      : callback_(), a_(std::move(a)) {
+    callback_.copy_from(callback);
     // we cannot not invoke callback in the constructor, because
     // this ctx might be invoked with a callback synchronously but the ctx has
     // not finished construction.
@@ -40,6 +41,7 @@ public:
   BOOLEAN STDMETHODCALLTYPE CompletedSynchronously() override { return true; }
   HRESULT STDMETHODCALLTYPE get_Callback(
       /* [retval][out] */ IFabricAsyncOperationCallback **callback) override {
+    // TODO this might not be right.
     *callback = callback_.get();
     return S_OK;
   }
@@ -49,7 +51,7 @@ public:
   std::any &get_any() { return a_; }
 
 private:
-  belt::com::com_ptr<IFabricAsyncOperationCallback> callback_;
+  winrt::com_ptr<IFabricAsyncOperationCallback> callback_;
   std::any a_;
 };
 
@@ -61,11 +63,11 @@ public:
                 IFabricAsyncOperationCallback *callback,
                 /*out*/ IFabricAsyncOperationContext **context) override {
     UNREFERENCED_PARAMETER(timeoutMilliseconds);
-    std::cout << timeoutMilliseconds << std::endl;
+    // std::cout << timeoutMilliseconds << std::endl;
     std::string msg = "hello " + request->fabricname();
     std::any a = std::move(msg);
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx =
-        async_any_context::create_instance(callback, std::move(a)).to_ptr();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx =
+        winrt::make<async_any_context>(callback, std::move(a));
     callback->Invoke(ctx.get());
     *context = ctx.detach();
     return fabricrpc::Status();

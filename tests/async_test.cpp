@@ -11,13 +11,11 @@
 #include <atlcom.h>
 
 #include <fabricrpc/exp/AsyncAnyContext.hpp>
-#include <servicefabric/waitable_callback.hpp>
+#include <fabricrpc_tool/waitable_callback.hpp>
 
 #include <chrono>
 #include <future> // for async
 #include <thread> // for thread sleep
-
-namespace sf = servicefabric;
 
 // payload to carry around between proccess request begin and end.
 struct ctxPayload {
@@ -300,9 +298,9 @@ BOOST_AUTO_TEST_CASE(async_test) {
   {
     async_bool_op bool_op;
 
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<fabricrpc::IWaitableCallback> callback =
+        winrt::make<fabricrpc::waitable_callback>();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
 
     bool request = true;
     hr = bool_op.Begin(&request, callback.get(), ctx.put());
@@ -318,9 +316,9 @@ BOOST_AUTO_TEST_CASE(async_test) {
   {
     async_compose_op bool_op;
 
-    belt::com::com_ptr<sf::IFabricAsyncOperationWaitableCallback> callback =
-        sf::FabricAsyncOperationWaitableCallback::create_instance().to_ptr();
-    belt::com::com_ptr<IFabricAsyncOperationContext> ctx;
+    winrt::com_ptr<fabricrpc::IWaitableCallback> callback =
+        winrt::make<fabricrpc::waitable_callback>();
+    winrt::com_ptr<IFabricAsyncOperationContext> ctx;
 
     bool request = true;
     hr = bool_op.Begin(&request, callback.get(), ctx.put());

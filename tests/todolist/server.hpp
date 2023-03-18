@@ -10,15 +10,6 @@
 #include <atlbase.h>
 #include <atlcom.h>
 
-#include "servicefabric/async_context.hpp"
-#include "servicefabric/fabric_error.hpp"
-#include "servicefabric/transport_dummy_client_conn_handler.hpp"
-#include "servicefabric/transport_dummy_client_notification_handler.hpp"
-#include "servicefabric/transport_dummy_msg_disposer.hpp"
-#include "servicefabric/transport_dummy_server_conn_handler.hpp"
-#include "servicefabric/transport_message.hpp"
-#include "servicefabric/waitable_callback.hpp"
-
 #include "fabricrpc/exp/AsyncAnyContext.hpp"
 
 #include <map>

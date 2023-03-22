@@ -11,8 +11,7 @@ Required:
 * service fabric runtime installation. See [get-started](https://learn.microsoft.com/en-us/azure/service-fabric/service-fabric-get-started)
 
 Auto downloaded by cmake:
-* [service-fabric-cpp](https://github.com/youyuanwu/service-fabric-cpp)
-    The generated code has no dependency to service-fabric-cpp.
+* [fabric-metadata](https://github.com/youyuanwu/fabric-metadata). Service fabric cpp COM headers.
 * [protobuf](https://github.com/protocolbuffers/protobuf)
 
 The fabric_rpc.lib and all support headers do not depend on protobuf.lib and header, so user can intergrate fabricrpc with any protobuf version.
@@ -33,9 +32,7 @@ See [Tutorial](./docs/Tutorial.md).
 The spec for networking protocol on top of FabricTransport is here [ProtocolSpec](./docs/ProtocolSpec.md)
 
 # Packaging Distribution
-## Nuget
-Nuget is publish with windows MSVC build. Since MSVC is ABI compatible, the binary can be used on windows platform.
-[FabricRpc](https://www.nuget.org/packages/FabricRpc)
+Only build from source is supported
 
 # License
 The Fabric RPC is covered by MIT license.

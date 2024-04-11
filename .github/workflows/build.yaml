@@ -86,10 +86,10 @@ jobs:
     - name: run some bench tests
       run: .\build\tests\helloworld_bench\${{ matrix.BUILD_TYPE }}\helloworld_bench.exe --detect_memory_leaks=0 -- --concurrency 1000 --connections 50 --test_sec 30
 
-    - name: Upload Report to Codecov
-      if: ${{ matrix.BUILD_TYPE == 'Debug' }}
-      uses: codecov/codecov-action@v2
-      with:
-        files: ./cobertura.xml
-        fail_ci_if_error: true
-        functionalities: fix
+    # - name: Upload Report to Codecov
+    #   if: ${{ matrix.BUILD_TYPE == 'Debug' }}
+    #   uses: codecov/codecov-action@v2
+    #   with:
+    #     files: ./cobertura.xml
+    #     fail_ci_if_error: true
+    #     functionalities: fix

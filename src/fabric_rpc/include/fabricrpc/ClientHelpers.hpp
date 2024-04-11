@@ -102,7 +102,8 @@ Status ExecClientEnd(IFabricTransportClient *client,
                   fReplyHeader.GetStatusMessage());
   }
   // parse response
-  if (!response->ParseFromString(msgPtr->GetBody())) {
+  auto data = msgPtr->GetBody();
+  if (!response->ParseFromArray(data.c_str(), static_cast<int>(data.size()))) {
     return Status(StatusCode::UNKNOWN, "Server returned bad body");
   }
   return Status();

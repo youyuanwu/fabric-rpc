@@ -2,13 +2,15 @@ cmake_minimum_required(VERSION 3.14)
 
 project(fabric-rpc)
 
+set (CMAKE_CXX_STANDARD 20)
+
 # import protobuf
 message(STATUS "fetching protobuf")
 include(FetchContent)
 FetchContent_Declare(
         protobuf
         GIT_REPOSITORY https://github.com/protocolbuffers/protobuf.git
-        GIT_TAG        v3.21.3
+        GIT_TAG        v4.23.4
 )
 set(protobuf_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(protobuf_BUILD_CONFORMANCE OFF CACHE BOOL "" FORCE)
@@ -20,6 +22,13 @@ if(NOT protobuf_POPULATED)
   FetchContent_Populate(protobuf)
   add_subdirectory(${protobuf_SOURCE_DIR} ${protobuf_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
+
+# set some options for protobuf lib
+target_compile_options(libprotobuf
+    INTERFACE
+    "/wd4100" # disable "unreferenced formal parameter" warnings
+    "/wd4127" # disable "conditional expression is constant" warnings
+)
 
 message(STATUS "fetching fabric_metadata")
 
@@ -68,7 +77,9 @@ if(OpenCppCoverage_exe)
     file(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}" PWD_WIN_PATH)
     add_custom_target(coverage
         COMMAND ${OpenCppCoverage_exe} --quiet --export_type cobertura:cobertura.xml --cover_children 
-        --sources "${PWD_WIN_PATH}\\src\\fabric_rpc" --modules "${PWD_WIN_PATH}"
+        --sources "${PWD_WIN_PATH}\\src"
+        --excluded_sources "${PWD_WIN_PATH}\\src\\generator"
+        --modules "${PWD_WIN_PATH}"
         -- ctest -C Debug --test-dir build --repeat until-pass:3 --timeout 30
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     )

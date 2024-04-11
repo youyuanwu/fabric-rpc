@@ -5,13 +5,7 @@
 // ------------------------------------------------------------
 
 #include <google/protobuf/compiler/code_generator.h>
-#include <google/protobuf/compiler/plugin.pb.h>
 #include <google/protobuf/descriptor.h>
-#include <google/protobuf/descriptor.pb.h>
-#include <google/protobuf/io/io_win32.h>
-#include <google/protobuf/io/zero_copy_stream_impl.h>
-#include <google/protobuf/stubs/common.h>
-#include <google/protobuf/stubs/logging.h>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/replace.hpp>
@@ -496,21 +490,14 @@ private:
   const pb::FileDescriptor *file_;
 };
 
-class CodeGenerator {
+// this generator implements protobufs
+// <google/protobuf/compiler/code_generator.h> interface
+
+class CodeGenerator : public google::protobuf::compiler::CodeGenerator {
 public:
-  bool GenerateAll(std::vector<const pb::FileDescriptor *> parsed_files,
-                   std::string &error) const {
-
-    for (auto f : parsed_files) {
-      if (!Generate(f)) {
-        error = "Generate failed";
-        return false;
-      }
-    }
-    return true;
-  }
-
-  bool Generate(const pb::FileDescriptor *file) const {
+  bool Generate(const pb::FileDescriptor *file, const std::string &parameter,
+                google::protobuf::compiler::GeneratorContext *generator_context,
+                std::string *error) const override {
     // usually input file name is myapp.proto
     // out file should be myapp.fabricrpc.h
     // and myapp.fabricrpc.cc

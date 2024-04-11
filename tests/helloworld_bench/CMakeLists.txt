@@ -19,7 +19,7 @@ target_include_directories(
   helloworld_bench
   PRIVATE
   .
-  ..
+  ../base_test
 )
 
 target_compile_definitions(helloworld_bench

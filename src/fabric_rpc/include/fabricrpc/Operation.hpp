@@ -37,7 +37,7 @@ public:
 
     T req;
     // deserialize
-    bool ok = req.ParseFromString(body);
+    bool ok = req.ParseFromArray(body.c_str(), static_cast<int>(body.size()));
     if (!ok) {
       return Status(StatusCode::INVALID_ARGUMENT, "cannot parse body");
     }

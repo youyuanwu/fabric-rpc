@@ -37,7 +37,7 @@ target_link_libraries(todolist_test PUBLIC
 target_include_directories(todolist_test PUBLIC
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
-    .. # for test helper
+    ../base_test # for test helper
 )
 
 add_test(NAME todolist_test COMMAND todolist_test

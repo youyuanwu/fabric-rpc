@@ -1,4 +1,10 @@
 # Fabric RPC
+Deprecated. fabric-rpc is no longer maintained.
+This use case is now covered by new project [grpc-bridge](https://github.com/youyuanwu/grpc-bridge).
+After grpc core supports AF_UNIX [PR](https://github.com/grpc/grpc/pull/34801), grpc cpp can use asp.net proxy on unix socket. Tls for grpc can be handled by asp.net proxy server.
+---
+fabric-rpc was developed to have grpc style server/client code gen but works with windows cert store.
+
 ![ci](https://github.com/youyuanwu/fabric-rpc/actions/workflows/build.yaml/badge.svg)
 [![codecov](https://codecov.io/github/youyuanwu/fabric-rpc/branch/main/graph/badge.svg?token=RE9WQSS0MU)](https://codecov.io/github/youyuanwu/fabric-rpc)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://raw.githubusercontent.com/youyuanwu/fabric-rpc/main/LICENSE)

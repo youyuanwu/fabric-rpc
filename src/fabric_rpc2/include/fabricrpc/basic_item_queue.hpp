@@ -5,6 +5,7 @@
 #include <winrt/base.h>
 
 #include "fabricrpc/request.hpp"
+#include <mutex>
 
 namespace fabricrpc {
 

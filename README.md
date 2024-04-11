@@ -1,6 +1,7 @@
 # Fabric RPC
 ![ci](https://github.com/youyuanwu/fabric-rpc/actions/workflows/build.yaml/badge.svg)
 [![codecov](https://codecov.io/github/youyuanwu/fabric-rpc/branch/main/graph/badge.svg?token=RE9WQSS0MU)](https://codecov.io/github/youyuanwu/fabric-rpc)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://raw.githubusercontent.com/youyuanwu/fabric-rpc/main/LICENSE)
 
 RPC framework based on FabricTransport in Service Fabric.
 

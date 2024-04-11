@@ -12,12 +12,19 @@ target_include_directories(${_lib_name}
     PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-target_link_libraries(${_lib_name} PUBLIC libprotobuf)
+target_link_libraries(${_lib_name} 
+  PUBLIC protobuf::libprotobuf
+)
 
 
 add_subdirectory(fabric_rpc)
 
 add_subdirectory(generator)
+
+# experimental impl
+add_subdirectory(fabric_rpc2)
+
+add_subdirectory(generator2)
 
 # fabric-rpc-tool lib used for testing and not intended to be used/shipped outside this repo.
 add_subdirectory(tool)

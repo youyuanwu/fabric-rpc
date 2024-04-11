@@ -11,7 +11,7 @@ jobs:
         os: [ windows-latest ]
         BOOST_VERSION: [ 1.79.0 ]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Get MSVC
       uses: ilammy/msvc-dev-cmd@v1
@@ -52,6 +52,14 @@ jobs:
           echo "sdkver=$sdkver" >> $env:GITHUB_ENV
       shell: pwsh
 
+    # cache cmake deps for faster build
+    # assume that deps content is controlled by CMakeLists.txt file at the root
+    - name: Cache build
+      uses: actions/cache@v3
+      with:
+        path: ${{github.workspace}}/build/_deps
+        key: ${{ matrix.os }}-${{ matrix.BUILD_TYPE }}-${{ hashFiles('CMakeLists.txt') }}-build
+
     - name: run cmake
       env:
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
@@ -78,10 +86,10 @@ jobs:
     - name: run some bench tests
       run: .\build\tests\helloworld_bench\${{ matrix.BUILD_TYPE }}\helloworld_bench.exe --detect_memory_leaks=0 -- --concurrency 1000 --connections 50 --test_sec 30
 
-    - name: Upload Report to Codecov
-      if: ${{ matrix.BUILD_TYPE == 'Debug' }}
-      uses: codecov/codecov-action@v2
-      with:
-        files: ./cobertura.xml
-        fail_ci_if_error: true
-        functionalities: fix
+    # - name: Upload Report to Codecov
+    #   if: ${{ matrix.BUILD_TYPE == 'Debug' }}
+    #   uses: codecov/codecov-action@v2
+    #   with:
+    #     files: ./cobertura.xml
+    #     fail_ci_if_error: true
+    #     functionalities: fix

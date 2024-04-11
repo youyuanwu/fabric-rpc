@@ -1,9 +1,11 @@
+file(GLOB_RECURSE _SOURCES
+  *.cpp
+  *.hpp
+)
+
 # fabric rpc impl lib
 add_library(fabric_rpc STATIC
-  Status.cpp
-  FRPCRequestHandler.cpp
-  FRPCTransportMessage.cpp
-  FRPCHeader.cpp
+  ${_SOURCES}
 )
 
 # turn on all warnings

@@ -83,7 +83,7 @@ public:
     assert(request != nullptr);
     assert(data != nullptr);
     RequestProto header;
-    if (!header.ParseFromString(*data)) {
+    if (!header.ParseFromArray(data->c_str(), static_cast<int>(data->size()))) {
       return false;
     }
     request->SetUrl(header.url());
@@ -94,7 +94,7 @@ public:
     assert(reply != nullptr);
     assert(data != nullptr);
     ReplyProto header;
-    if (!header.ParseFromString(*data)) {
+    if (!header.ParseFromArray(data->c_str(), static_cast<int>(data->size()))) {
       return false;
     }
     reply->SetStatusCode(header.status_code());

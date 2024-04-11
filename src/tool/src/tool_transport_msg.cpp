@@ -40,6 +40,9 @@ std::string get_header(IFabricTransportMessage *message) {
   const FABRIC_TRANSPORT_MESSAGE_BUFFER *msgbuf = {};
   ULONG msgcount = 0;
   message->GetHeaderAndBodyBuffer(&headerbuf, &msgcount, &msgbuf);
+  if (headerbuf == nullptr) {
+    return "";
+  }
   return std::string(headerbuf->Buffer,
                      headerbuf->Buffer + headerbuf->BufferSize);
 }

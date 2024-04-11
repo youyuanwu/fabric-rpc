@@ -1,6 +1,6 @@
 set (CMAKE_CXX_STANDARD 20) # use semaphore
 
-file(GLOB tool_sources
+file(GLOB_RECURSE tool_sources
   *.cpp
   *.hpp
 )

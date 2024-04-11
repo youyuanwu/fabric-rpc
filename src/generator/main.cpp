@@ -36,99 +36,14 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <fcntl.h>
-#include <io.h> // setmode
+// see https://github.com/grpc/grpc/blob/master/src/compiler/cpp_plugin.cc for
+// similar implementation
 
-#include <google/protobuf/compiler/code_generator.h>
-#include <google/protobuf/compiler/plugin.pb.h>
-#include <google/protobuf/descriptor.h>
-#include <google/protobuf/descriptor.pb.h>
-#include <google/protobuf/io/io_win32.h>
-#include <google/protobuf/io/zero_copy_stream_impl.h>
-#include <google/protobuf/stubs/common.h>
-#include <google/protobuf/stubs/logging.h>
-
-#include <iostream>
+#include <google/protobuf/compiler/plugin.h>
 
 #include "gen.hpp"
 
-namespace pb = google::protobuf;
-namespace pbc = pb::compiler;
-
-bool GenerateCode(const pbc::CodeGeneratorRequest &request,
-                  const CodeGenerator &generator,
-                  pbc::CodeGeneratorResponse *response,
-                  std::string *error_msg) {
-  pb::DescriptorPool pool;
-  for (int i = 0; i < request.proto_file_size(); i++) {
-    const pb::FileDescriptor *file = pool.BuildFile(request.proto_file(i));
-    if (file == nullptr) {
-      // BuildFile() already wrote an error message.
-      return false;
-    }
-  }
-
-  std::vector<const pb::FileDescriptor *> parsed_files;
-  for (int i = 0; i < request.file_to_generate_size(); i++) {
-    parsed_files.push_back(pool.FindFileByName(request.file_to_generate(i)));
-    if (parsed_files.back() == nullptr) {
-      *error_msg = "protoc asked plugin to generate a file but "
-                   "did not provide a descriptor for the file: " +
-                   request.file_to_generate(i);
-      return false;
-    }
-  }
-
-  std::string error;
-  bool succeeded = generator.GenerateAll(parsed_files, error);
-  // currently the generator always return success.
-  if (!succeeded && error.empty()) {
-    error = "Code generator returned false but provided no error description.";
-  }
-  if (!error.empty()) {
-    response->set_error(error);
-  }
-  return true;
-}
-
 int main(int argc, char *argv[]) {
-  if (argc > 1) {
-    // TODO: support options.
-    std::cerr << argv[0] << ": Unknown option: " << argv[1] << std::endl;
-    return EXIT_FAILURE;
-  }
-
-#ifdef _WIN32
-  // On windows protoc will send proto binary request from stdin.
-  // we need to change stdin and stdout in binary mode.
-  ::_setmode(_fileno(stdin), _O_BINARY);
-  ::_setmode(_fileno(stdout), _O_BINARY);
-#endif
-
-  pbc::CodeGeneratorRequest request;
-
-  if (!request.ParseFromIstream(&std::cin)) {
-    std::cerr << argv[0] << ": protoc sent unparseable request to plugin."
-              << std::endl;
-    return EXIT_FAILURE;
-  }
-
-  std::string error_msg;
-  pbc::CodeGeneratorResponse response;
-
   CodeGenerator generator;
-
-  if (GenerateCode(request, generator, &response, &error_msg)) {
-    if (!response.SerializeToOstream(&std::cout)) {
-      std::cerr << argv[0] << ": Error writing to stdout." << std::endl;
-      return EXIT_FAILURE;
-    }
-  } else {
-    if (!error_msg.empty()) {
-      std::cerr << argv[0] << ": " << error_msg << std::endl;
-    }
-    return EXIT_FAILURE;
-  }
-
-  return EXIT_SUCCESS;
+  return google::protobuf::compiler::PluginMain(argc, argv, &generator);
 }
